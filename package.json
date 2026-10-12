@@ -62,7 +62,8 @@
         "deb"
       ],
       "category": "AudioVideo",
-      "icon": "build/icon.png"
+      "icon": "build/icon.png",
+      "maintainer": "Farid Masjedi <faridmasjedi@users.noreply.github.com>"
     },
     "directories": {
       "buildResources": "build"
