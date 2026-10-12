@@ -1,0 +1,71 @@
+{
+  "name": "nomadqlab",
+  "productName": "NomadQlab",
+  "version": "0.1.0",
+  "description": "Free, open-source, cross-platform show control: audio, video, lighting, OSC, MIDI \u2014 every feature unlocked.",
+  "main": "src/main/main.js",
+  "author": "Farid Masjedi",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "smoke": "NQ_SMOKE=1 electron .",
+    "test": "node --test test/*.test.mjs",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "app.nomadqlab",
+    "productName": "NomadQlab",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "fileAssociations": [
+      {
+        "ext": "nomadqlab",
+        "name": "NomadQlab Workspace",
+        "role": "Editor"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.music",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "AudioVideo"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "faridmasjedi",
+        "repo": "NomadQlab"
+      }
+    ]
+  },
+  "dependencies": {
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/faridmasjedi/NomadQlab.git"
+  }
+}

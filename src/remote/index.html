@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#15171c">
+<title>NomadQlab Remote</title>
+<style>
+  :root { --bg:#15171c; --bg2:#1c1f26; --bg3:#262a34; --fg:#e6e8ee; --muted:#8a92a3; --go:#2fbf71; --danger:#e5484d; --accent:#3d8bfd; color-scheme: dark; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px -apple-system, system-ui, sans-serif; display:flex; flex-direction:column; height:100vh; height:100dvh; }
+  header { padding:12px 16px 8px; background:var(--bg2); }
+  .label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
+  #ph { font-size:22px; font-weight:700; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #notes { color:#f5a623; min-height:18px; font-size:14px; }
+  .controls { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; padding:10px 16px; background:var(--bg2); }
+  button { font:inherit; color:var(--fg); background:var(--bg3); border:1px solid #343a47; border-radius:10px; padding:14px 8px; }
+  button:active { filter:brightness(1.3); }
+  #go { grid-column: 1 / -1; font-size:34px; font-weight:800; letter-spacing:3px; background:var(--go); color:#04230f; border:none; padding:24px; border-radius:14px; }
+  #panic { background:#5a1f24; border-color:var(--danger); font-weight:700; }
+  main { flex:1; overflow-y:auto; padding:6px 0 20px; }
+  .section { padding:10px 16px 4px; }
+  .cue { display:flex; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid #20242c; }
+  .cue.ph { background:rgba(47,191,113,.15); box-shadow: inset 4px 0 0 var(--go); }
+  .cue.running .dot { background:var(--go); }
+  .dot { width:9px; height:9px; border-radius:50%; background:transparent; flex-shrink:0; }
+  .num { width:44px; font-weight:700; color:var(--muted); }
+  .name { flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+  .cue button { padding:6px 12px; font-size:13px; }
+  .run { margin:6px 16px; background:var(--bg3); border-radius:10px; padding:10px 12px; }
+  .bar { height:4px; background:#0e1014; border-radius:2px; margin-top:6px; overflow:hidden; } .fill { height:100%; background:var(--go); }
+  #status { position:fixed; top:8px; right:12px; font-size:11px; color:var(--muted); }
+  #auth { position:fixed; inset:0; background:var(--bg); display:none; align-items:center; justify-content:center; flex-direction:column; gap:12px; }
+  #auth input { font:inherit; padding:12px; border-radius:8px; border:1px solid #343a47; background:var(--bg2); color:var(--fg); width:220px; text-align:center; }
+</style>
+</head>
+<body>
+<div id="status">connecting…</div>
+<header><div class="label">Standing by</div><div id="ph">—</div><div id="notes"></div></header>
+<div class="controls">
+  <button id="go">GO</button>
+  <button data-a="prev">▲ Prev</button>
+  <button data-a="next">▼ Next</button>
+  <button id="panic" data-a="panic">■ Panic</button>
+  <button data-a="pauseAll">❙❙ Pause</button>
+  <button data-a="resumeAll">▶ Resume</button>
+  <button data-a="hardStop">Hard stop</button>
+</div>
+<main>
+  <div id="running"></div>
+  <div class="section label" id="listName">Cues</div>
+  <div id="cues"></div>
+</main>
+<div id="auth"><div>Passcode</div><input id="pass" type="password" inputmode="numeric"><button id="passBtn">Connect</button></div>
+<script>
+  let ws, state = null;
+  const $ = (id) => document.getElementById(id);
+  const send = (action, extra = {}) => ws && ws.readyState === 1 && ws.send(JSON.stringify({ type: 'command', action, ...extra }));
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const fmt = (s) => !isFinite(s) ? '∞' : `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
+  function connect() {
+    ws = new WebSocket(`ws://${location.host}`);
+    ws.onopen = () => { $('status').textContent = 'connected'; const p = localStorage.getItem('nqpass'); if (p) ws.send(JSON.stringify({ type: 'auth', passcode: p })); };
+    ws.onclose = () => { $('status').textContent = 'disconnected — retrying'; setTimeout(connect, 1500); };
+    ws.onmessage = (e) => {
+      const m = JSON.parse(e.data);
+      if (m.type === 'hello' && m.needsPasscode && !localStorage.getItem('nqpass')) $('auth').style.display = 'flex';
+      if (m.type === 'auth') { $('auth').style.display = m.ok ? 'none' : 'flex'; if (!m.ok) localStorage.removeItem('nqpass'); }
+      if (m.type === 'state') { state = m.state; draw(); }
+    };
+  }
+  function draw() {
+    const s = state;
+    $('ph').textContent = s.playhead ? `${s.playhead.number ? s.playhead.number + ' · ' : ''}${s.playhead.name}` : '— end of list —';
+    $('notes').textContent = s.playhead?.notes || '';
+    $('listName').textContent = (s.lists.find((l) => l.id === s.activeListId)?.name || 'Cues') + ` · ${s.name}`;
+    $('running').innerHTML = s.running.map((r) => `<div class="run"><div style="display:flex;justify-content:space-between"><b>${esc(r.number)} ${esc(r.name)}</b><span>${fmt(r.elapsed)} / ${r.duration ? fmt(r.duration) : '—'}</span></div><div class="bar"><div class="fill" style="width:${r.duration && isFinite(r.duration) ? Math.min(100, r.elapsed / r.duration * 100) : 100}%"></div></div><div style="text-align:right;margin-top:6px"><button onclick="send('stop',{id:'${r.id}'})">Stop</button></div></div>`).join('');
+    $('cues').innerHTML = s.cues.map((c) => `<div class="cue ${s.playhead && s.playhead.id === c.id ? 'ph' : ''} ${c.running ? 'running' : ''}" style="padding-left:${16 + c.depth * 16}px"><span class="dot"></span><span class="num">${esc(c.number)}</span><span class="name" onclick="send('playhead',{id:'${c.id}'})">${esc(c.name)}</span><button onclick="send('fire',{id:'${c.id}'})">Fire</button></div>`).join('');
+  }
+  $('go').onclick = () => send('go');
+  document.querySelectorAll('[data-a]').forEach((b) => b.onclick = () => send(b.dataset.a));
+  $('passBtn').onclick = () => { localStorage.setItem('nqpass', $('pass').value); ws.send(JSON.stringify({ type: 'auth', passcode: $('pass').value })); };
+  connect();
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file: media: blob: data: mediastream:; style-src 'self' 'unsafe-inline' file:; script-src 'self' file: 'unsafe-eval'">
+  <title>NomadQlab</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header id="topbar">
+    <button id="goBtn" title="GO (Space)">GO</button>
+    <div id="standby">
+      <div class="sb-label">Standing by</div>
+      <div id="sbCue"></div>
+      <div id="sbNotes"></div>
+    </div>
+    <div class="transport">
+      <button id="pauseBtn" title="Pause / resume all (P)">❙❙ Pause</button>
+      <button id="resetBtn" title="Stop everything and return playhead to the top">↺ Reset</button>
+      <button id="panicBtn" class="danger" title="Panic: fade out everything (Esc). Twice = hard stop">■ Panic</button>
+    </div>
+    <div class="right">
+      <button id="showModeBtn" class="pill" title="Show mode locks editing (⌘⇧M)">Show Mode</button>
+      <button id="lightsBtn" class="icon-btn" title="Light Dashboard (⌘⇧L)">☀</button>
+      <button id="remoteBtn" class="icon-btn" title="Web remote">📱</button>
+      <button id="logBtn" class="icon-btn" title="Log">≡</button>
+      <button id="settingsBtn" class="icon-btn" title="Workspace Settings (⌘,)">⚙</button>
+    </div>
+  </header>
+  <nav id="toolbar"></nav>
+  <main>
+    <aside id="sidebar">
+      <div class="side-head"><span>Cue Lists & Carts</span>
+        <span><button id="addListBtn" class="icon-btn small" title="New cue list">+☰</button><button id="addCartBtn" class="icon-btn small" title="New cart">+▦</button></span>
+      </div>
+      <div id="lists"></div>
+      <div class="side-head"><span>Active Cues</span></div>
+      <div id="active"></div>
+    </aside>
+    <section id="center">
+      <div id="cuelist"></div>
+      <div id="inspector"></div>
+    </section>
+  </main>
+  <footer id="statusbar">
+    <span id="statusLeft"></span>
+    <span id="statusLog"></span>
+    <canvas id="miniMeters" width="80" height="16" title="Output meters (click to enlarge)"></canvas>
+  </footer>
+  <div id="modal-root"></div>
+  <div id="dropHint">Drop media to create cues</div>
+  <script type="module" src="ui.js"></script>
+</body>
+</html>
