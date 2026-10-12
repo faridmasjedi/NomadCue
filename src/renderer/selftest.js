@@ -1,6 +1,9 @@
 // End-to-end self test run by `npm run smoke` (NQ_SMOKE=1). Exercises the real engine, audio graph,
 // lighting, OSC loopback, scripts and undo inside the running app.
-import { app, loadWorkspace, applySettings, change, undo, log } from './app.js';
+import {
+  app, loadWorkspace, applySettings, change, undo, log, addCue, moveIntoGroup, moveOutOfGroup, moveUpDown, setWait,
+  crossfadeToNext, addFadeOut, copySelected, paste, select,
+} from './app.js';
 import { createWorkspace, createCue } from './lib/model.js';
 import { uid } from './lib/util.js';
 
@@ -130,7 +133,59 @@ export async function runSelfTest() {
       check('text cue timed out', !app.engine.isRunning(txt.id));
     }
 
-    // 11. undo
+    // 11. editing operations used by the right-click menu
+    const list = ws.lists[0];
+    const g = createCue('group', { number: 'G', mode: 'all' });
+    list.cues.push(g);
+    const inside = addCue('memo', { name: 'inside' }, { inside: g.id });
+    check('add cue inside group', g.children.includes(inside));
+    const loose = addCue('memo', { name: 'loose' }, { after: g.id });
+    moveIntoGroup([loose.id], g.id);
+    check('move into group', g.children.includes(loose) && !list.cues.includes(loose));
+    moveOutOfGroup([loose.id]);
+    check('move out of group lands after the group', list.cues[list.cues.indexOf(g) + 1] === loose);
+    moveUpDown([loose.id], -1);
+    check('move up', list.cues[list.cues.indexOf(g) - 1] === loose);
+    setWait([loose.id], 'postWait', 2);
+    check('setting post-wait enables auto-continue', loose.postWait === 2 && loose.continueMode === 'auto-continue');
+    select(loose.id);
+    copySelected();
+    const before2 = list.cues.length;
+    paste({ after: loose.id });
+    check('copy / paste cue', list.cues.length === before2 + 1 && list.cues[list.cues.indexOf(loose) + 1].name === 'loose');
+
+    // 12. crossfade helper: one GO fades A out while B fades in
+    const a = createCue('audio', { number: 'XA', file: '/__selftest_long__.wav', loops: 0 });
+    const b = createCue('audio', { number: 'XB', file: '/__selftest_long__.wav', loops: 0 });
+    list.cues.push(a, b);
+    const xf = crossfadeToNext(a.id, 0.3);
+    check('crossfade cue inserted between', list.cues.indexOf(xf) === list.cues.indexOf(a) + 1 && list.cues.indexOf(b) === list.cues.indexOf(xf) + 1
+      && xf.continueMode === 'auto-continue' && b.fadeIn === 0.3 && xf.target === a.id && xf.stopTargetWhenDone);
+    app.engine.trigger(a);
+    await sleep(150);
+    app.engine.setPlayhead(xf.id);
+    app.engine.go();
+    await sleep(100);
+    check('crossfade starts the next cue', app.engine.isRunning(b.id) && app.engine.isRunning(a.id));
+    await sleep(600);
+    check('crossfade stops the previous cue', !app.engine.isRunning(a.id) && app.engine.isRunning(b.id));
+    app.engine.hardStop();
+    const fo = addFadeOut(b.id, 1);
+    check('add fade-out after', fo.target === b.id && list.cues.indexOf(fo) === list.cues.indexOf(b) + 1);
+
+    // 13. the right-click menu really opens on a cue row
+    select(loose.id);
+    await sleep(50);
+    const rowEl = document.querySelector(`.row[data-id="${loose.id}"]`);
+    rowEl?.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 300, clientY: 300 }));
+    await sleep(50);
+    const labels = [...document.querySelectorAll('.cm .cm-label')].map((x) => x.textContent);
+    check('context menu opens with actions', ['Add cue after', 'Move into group', 'Delete cue'].every((l) => labels.includes(l)) && labels.some((l) => l.startsWith('Then:')), labels.join('|'));
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await sleep(20);
+    check('context menu closes on Esc', !document.querySelector('.cm'));
+
+    // 14. undo
     const n = ws.lists[0].cues.length;
     change(() => { ws.lists[0].cues.push(createCue('memo', { number: uid() })); });
     check('change adds cue', app.ws.lists[0].cues.length === n + 1);
@@ -182,11 +237,20 @@ export function buildDemo() {
   return ws;
 }
 
-export async function showDemo() {
+export async function showDemo(mode) {
   const ws = buildDemo();
   loadWorkspace(ws, null);
   await sleep(300);
-  const { select } = await import('./app.js');
-  select(ws.lists[0].cues[0].id);
+  select(ws.lists[0].cues[1].id);
+  if (mode === 'menu') {
+    await sleep(100);
+    const row = document.querySelectorAll('#cuelist .rows .row')[1];
+    const r = row.getBoundingClientRect();
+    row.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: r.left + 420, clientY: r.top + 12 }));
+    await sleep(100);
+    // open the "Then:" submenu too
+    const then = [...document.querySelectorAll('.cm-item')].find((x) => x.textContent.includes('Then:'));
+    then?.click();
+  }
   return true;
 }

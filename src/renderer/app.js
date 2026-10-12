@@ -150,31 +150,177 @@ export function moveSelection(delta) {
 
 // ------------------------------------------------------------------ cue editing
 
-export function addCue(type, overrides = {}) {
+// placement: { inside: groupId } adds as the group's last child, { after: cueId } inserts after that cue,
+// otherwise the new cue goes after the current selection (or at the end of the list).
+export function addCue(type, overrides = {}, placement = {}) {
   const list = viewList();
-  const sel = app.lastSelected && findCue(app.ws, app.lastSelected);
+  const anchorId = placement.inside || placement.after || app.lastSelected;
+  const sel = anchorId && findCue(app.ws, anchorId);
   const cue = createCue(type, overrides);
   const numbers = allCues(app.ws).map((c) => c.number);
   if (cue.number === '' && type !== 'memo') cue.number = nextCueNumber(numbers, sel?.cue.number);
-  // Target-type cues default to targeting the selected cue
-  if (CUE_TYPES[type].targets === 'cue' && sel && !cue.target) cue.target = sel.cue.id;
+  // Target-type cues default to targeting the anchor cue
+  if (CUE_TYPES[type].targets === 'cue' && sel && !cue.target && !placement.inside) cue.target = sel.cue.id;
   if (type === 'fade' && sel && ['video', 'camera', 'text'].includes(sel.cue.type)) { cue.fadeLevel = false; cue.fadeOpacity = true; }
   if (type === 'fade' && sel?.cue.type === 'fade') { cue.target = sel.cue.target; }
   if (['video', 'camera', 'text'].includes(type) && !cue.stage) cue.stage = app.ws.settings.stages[0]?.id || '';
   snapshot();
-  if (sel && sel.list === list) {
-    const sibs = sel.parent ? sel.parent.children : list.cues;
-    if (sel.cue.type === 'group' && !sel.cue.collapsed && type !== 'group' && overrides._intoGroup) sel.cue.children.push(cue);
-    else sibs.splice(sibs.indexOf(sel.cue) + 1, 0, cue);
+  if (placement.inside && sel?.cue.type === 'group') {
+    sel.cue.children.push(cue);
+    sel.cue.collapsed = false;
+  } else if (sel && (sel.list === list || placement.after)) {
+    const sibs = sel.parent ? sel.parent.children : sel.list.cues;
+    sibs.splice(sibs.indexOf(sel.cue) + 1, 0, cue);
   } else {
     list.cues.push(cue);
   }
-  delete cue._intoGroup;
   if (list.id === app.engine.activeList()?.id && !app.engine.playheadId) app.engine.setPlayhead(cue.id);
   select(cue.id);
   commit();
   checkMedia();
   return cue;
+}
+
+// ------------------------------------------------------------------ transitions & quick edits
+
+export function setContinueMode(ids, mode) {
+  change(() => { for (const id of ids) { const c = findCue(app.ws, id)?.cue; if (c) c.continueMode = mode; } });
+}
+
+export function setWait(ids, key, seconds) {
+  change(() => {
+    for (const id of ids) {
+      const c = findCue(app.ws, id)?.cue;
+      if (!c) continue;
+      c[key] = Math.max(0, Number(seconds) || 0);
+      // A post-wait only matters when the cue auto-continues, so switch it on for the user.
+      if (key === 'postWait' && c[key] > 0 && c.continueMode === 'none') c.continueMode = 'auto-continue';
+    }
+  });
+}
+
+export function setCueProp(ids, key, value) {
+  change(() => { for (const id of ids) { const c = findCue(app.ws, id)?.cue; if (c) c[key] = typeof value === 'function' ? value(c[key]) : value; } });
+}
+
+export function moveIntoGroup(ids, groupId) { moveCues(ids, groupId, 'into'); }
+
+export function moveOutOfGroup(ids) {
+  const items = ids.map((id) => findCue(app.ws, id)).filter((f) => f && f.parent);
+  if (!items.length) return;
+  snapshot();
+  // Process in reverse so the order is preserved when inserting after the parent group.
+  for (const f of items.reverse()) {
+    const group = findCue(app.ws, f.parent.id);
+    removeCue(app.ws, f.cue.id);
+    const sibs = group.parent ? group.parent.children : group.list.cues;
+    sibs.splice(sibs.indexOf(group.cue) + 1, 0, f.cue);
+  }
+  commit();
+}
+
+export function moveUpDown(ids, delta) {
+  const items = ids.map((id) => findCue(app.ws, id)).filter(Boolean);
+  if (!items.length) return;
+  snapshot();
+  const ordered = delta < 0 ? items : items.reverse();
+  for (const f of ordered) {
+    const sibs = f.parent ? f.parent.children : f.list.cues;
+    const i = sibs.indexOf(f.cue);
+    const j = i + delta;
+    if (j < 0 || j >= sibs.length || ids.includes(sibs[j].id)) continue;
+    [sibs[i], sibs[j]] = [sibs[j], sibs[i]];
+  }
+  commit();
+}
+
+function nextSibling(id) {
+  const sibs = siblingsOf(app.ws, id) || [];
+  return sibs[sibs.findIndex((c) => c.id === id) + 1] || null;
+}
+
+const VISUAL = ['video', 'camera', 'text'];
+
+function makeFadeOut(target, seconds, name) {
+  const visual = VISUAL.includes(target.type);
+  return createCue('fade', {
+    name, target: target.id, duration: seconds, stopTargetWhenDone: true,
+    fadeLevel: !visual, level: -60, fadeOpacity: visual, opacity: 0, fadeVolume: target.type === 'video', volume: -60,
+  });
+}
+
+// Inserts a fade-out cue right after `cueId` that fades it to silence/black and stops it.
+export function addFadeOut(cueId, seconds = 3) {
+  const f = findCue(app.ws, cueId);
+  if (!f) return null;
+  const label = f.cue.name || cueSummaryFor(f.cue);
+  const fade = makeFadeOut(f.cue, seconds, `Fade out ${label}`);
+  fade.number = nextCueNumber(allCues(app.ws).map((c) => c.number), f.cue.number);
+  snapshot();
+  const sibs = f.parent ? f.parent.children : f.list.cues;
+  sibs.splice(sibs.indexOf(f.cue) + 1, 0, fade);
+  app.selection = new Set([fade.id]);
+  app.lastSelected = fade.id;
+  commit();
+  return fade;
+}
+
+// Crossfade: one GO fades this cue out while the next cue fades in.
+// Inserts "Crossfade" fade cue (auto-continue, 0 post-wait) before the next cue and gives the next cue a fade-in.
+export function crossfadeToNext(cueId, seconds = 3) {
+  const f = findCue(app.ws, cueId);
+  const next = f && nextSibling(cueId);
+  if (!f || !next) return null;
+  const fade = makeFadeOut(f.cue, seconds, `Crossfade ${f.cue.name || cueSummaryFor(f.cue)} → ${next.name || cueSummaryFor(next)}`);
+  fade.continueMode = 'auto-continue';
+  fade.postWait = 0;
+  fade.number = nextCueNumber(allCues(app.ws).map((c) => c.number), f.cue.number);
+  snapshot();
+  if ('fadeIn' in next) next.fadeIn = seconds;
+  if (f.cue.continueMode !== 'none') f.cue.continueMode = 'none';
+  const sibs = f.parent ? f.parent.children : f.list.cues;
+  sibs.splice(sibs.indexOf(next), 0, fade);
+  app.selection = new Set([fade.id]);
+  app.lastSelected = fade.id;
+  commit();
+  return fade;
+}
+
+function cueSummaryFor(cue) {
+  return cue.file ? basename(cue.file) : CUE_TYPES[cue.type].label;
+}
+
+// ------------------------------------------------------------------ clipboard (cues)
+
+export function copySelected() {
+  const cues = selectedCues();
+  if (!cues.length) return false;
+  app.clipboard = JSON.stringify(cues);
+  return true;
+}
+
+export function cutSelected() {
+  if (copySelected()) deleteSelected();
+}
+
+export function paste(placement = {}) {
+  if (!app.clipboard) return;
+  const cues = JSON.parse(app.clipboard).map(cloneCue);
+  const numbers = allCues(app.ws).map((c) => c.number);
+  for (const c of cues) {
+    if (c.number && numbers.includes(c.number)) { c.number = nextCueNumber(numbers, c.number); }
+    numbers.push(c.number);
+  }
+  const anchor = placement.inside || placement.after || app.lastSelected;
+  const sel = anchor && findCue(app.ws, anchor);
+  snapshot();
+  if (placement.inside && sel?.cue.type === 'group') sel.cue.children.push(...cues);
+  else if (sel) { const sibs = sel.parent ? sel.parent.children : sel.list.cues; sibs.splice(sibs.indexOf(sel.cue) + 1, 0, ...cues); }
+  else viewList().cues.push(...cues);
+  app.selection = new Set(cues.map((c) => c.id));
+  app.lastSelected = cues[cues.length - 1].id;
+  commit();
+  checkMedia();
 }
 
 export function deleteSelected() {
@@ -280,14 +426,19 @@ export function moveCuesToList(ids, listId) {
   commit();
 }
 
-export function addFiles(paths) {
+export function addFiles(paths, placement = {}) {
   const audioExt = /\.(wav|aiff?|mp3|flac|ogg|m4a|aac|opus)$/i;
   const videoExt = /\.(mp4|m4v|mov|webm|mkv|png|jpe?g|gif|webp|svg)$/i;
   const midiExt = /\.midi?$/i;
+  let where = { ...placement };
+  const add = (type, file) => {
+    const c = addCue(type, { file }, where);
+    if (!where.inside) where = { after: c.id }; // keep the files in order
+  };
   for (const p of paths) {
-    if (audioExt.test(p)) addCue('audio', { file: p });
-    else if (videoExt.test(p)) addCue('video', { file: p });
-    else if (midiExt.test(p)) addCue('midifile', { file: p });
+    if (audioExt.test(p)) add('audio', p);
+    else if (videoExt.test(p)) add('video', p);
+    else if (midiExt.test(p)) add('midifile', p);
     else if (/\.nomadcue$/i.test(p)) { openFromData(p, null); return; }
     else toast(`Unsupported file: ${basename(p)}`);
   }

@@ -103,7 +103,7 @@ function runSmoke() {
       if (result && result.failed && result.failed.length) errors.push(...result.failed);
     } catch (e) { errors.push(String(e)); }
     if (process.env.NQ_SHOT) {
-      await controlWin.webContents.executeJavaScript('window.__nqDemo()');
+      await controlWin.webContents.executeJavaScript(`window.__nqDemo(${JSON.stringify(process.env.NQ_SHOT_MODE || '')})`);
       await new Promise((r) => setTimeout(r, 1500));
       const img = await controlWin.webContents.capturePage();
       fs.writeFileSync(process.env.NQ_SHOT, img.toPNG());
