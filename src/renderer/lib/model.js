@@ -105,7 +105,7 @@ export function defaultSettings() {
 }
 
 export function createWorkspace() {
-  return { app: 'NomadQlab', version: 1, settings: defaultSettings(), lists: [createList()] };
+  return { app: 'NomadCue', version: 1, settings: defaultSettings(), lists: [createList()] };
 }
 
 // Merge loaded data with defaults so older/foreign files keep working.

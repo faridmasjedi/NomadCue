@@ -1,6 +1,6 @@
 {
-  "name": "nomadqlab",
-  "productName": "NomadQlab",
+  "name": "nomadcue",
+  "productName": "NomadCue",
   "version": "0.1.0",
   "description": "Free, open-source, cross-platform show control: audio, video, lighting, OSC, MIDI \u2014 every feature unlocked.",
   "main": "src/main/main.js",
@@ -16,27 +16,41 @@
     "dist:linux": "electron-builder --linux"
   },
   "build": {
-    "appId": "app.nomadqlab",
-    "productName": "NomadQlab",
+    "appId": "app.nomadcue",
+    "productName": "NomadCue",
     "files": [
       "src/**/*",
       "package.json"
     ],
     "fileAssociations": [
       {
-        "ext": "nomadqlab",
-        "name": "NomadQlab Workspace",
+        "ext": "nomadcue",
+        "name": "NomadCue Workspace",
         "role": "Editor"
       }
     ],
     "mac": {
       "category": "public.app-category.music",
+      "icon": "build/icon.png",
       "target": [
-        "dmg",
-        "zip"
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
       ]
     },
     "win": {
+      "icon": "build/icon.png",
       "target": [
         "nsis",
         "portable"
@@ -47,15 +61,16 @@
         "AppImage",
         "deb"
       ],
-      "category": "AudioVideo"
+      "category": "AudioVideo",
+      "icon": "build/icon.png"
     },
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "faridmasjedi",
-        "repo": "NomadQlab"
-      }
-    ]
+    "directories": {
+      "buildResources": "build"
+    },
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    }
   },
   "dependencies": {
     "ws": "^8.22.0"
@@ -66,6 +81,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/faridmasjedi/NomadQlab.git"
+    "url": "https://github.com/faridmasjedi/NomadCue.git"
   }
 }

@@ -40,7 +40,7 @@ export function modal(title, body, { onClose, wide, actions } = {}) {
 export function confirmDialog(message, { ok = 'OK', cancel = 'Cancel', danger } = {}) {
   return new Promise((resolve) => {
     let result = false;
-    modal('NomadQlab', h('p', {}, message), {
+    modal('NomadCue', h('p', {}, message), {
       onClose: () => resolve(result),
       actions: (close) => [
         h('button', { onClick: close }, cancel),

@@ -1,4 +1,4 @@
-// NomadQlab renderer entry: app state, engine wiring, persistence, undo, keyboard, OSC/MIDI/remote control.
+// NomadCue renderer entry: app state, engine wiring, persistence, undo, keyboard, OSC/MIDI/remote control.
 import { Engine } from './lib/engine.js';
 import {
   createWorkspace, normalizeWorkspace, createCue, createList, findCue, findCueByNumber, siblingsOf, removeCue, walk,
@@ -65,8 +65,8 @@ export function markDirty() {
 }
 
 function updateTitle() {
-  const name = app.path ? basename(app.path).replace(/\.nomadqlab$/, '') : 'Untitled';
-  window.nq.setTitle(`${app.dirty ? '• ' : ''}${name} — NomadQlab`);
+  const name = app.path ? basename(app.path).replace(/\.nomadcue$/, '') : 'Untitled';
+  window.nq.setTitle(`${app.dirty ? '• ' : ''}${name} — NomadCue`);
   app.onTitle?.(name);
 }
 
@@ -131,7 +131,7 @@ export function select(id, { add = false, range = false } = {}) {
     if (id) app.selection.add(id);
     app.lastSelected = id;
   }
-  // Playhead follows selection of top-level cues in the active list (QLab-style default).
+  // Playhead follows selection of top-level cues in the active list.
   const f = id && findCue(app.ws, id);
   if (f && !f.parent && f.list.id === app.engine.activeList()?.id && f.list.kind !== 'cart' && !app.ws.settings.general.showMode) {
     app.engine.setPlayhead(id);
@@ -288,7 +288,7 @@ export function addFiles(paths) {
     if (audioExt.test(p)) addCue('audio', { file: p });
     else if (videoExt.test(p)) addCue('video', { file: p });
     else if (midiExt.test(p)) addCue('midifile', { file: p });
-    else if (/\.nomadqlab$/i.test(p)) { openFromData(p, null); return; }
+    else if (/\.nomadcue$/i.test(p)) { openFromData(p, null); return; }
     else toast(`Unsupported file: ${basename(p)}`);
   }
 }
@@ -420,7 +420,7 @@ export async function bundleWorkspace() {
   if (!r) return;
   snapshot();
   for (const c of allCues(app.ws)) if (c.file && r.mapping[c.file]) c.file = r.mapping[c.file];
-  app.path = r.folder + '/' + (app.path ? basename(app.path) : 'Workspace.nomadqlab');
+  app.path = r.folder + '/' + (app.path ? basename(app.path) : 'Workspace.nomadcue');
   commit();
   await save();
   toast(`Bundled ${Object.keys(r.mapping).length} media files`);
@@ -473,7 +473,7 @@ export function fireCue(id) {
   else app.engine.trigger(f.cue);
 }
 
-// ------------------------------------------------------------------ OSC control (QLab-compatible subset)
+// ------------------------------------------------------------------ OSC control
 
 function oscReply(from, address, data, status = 'ok') {
   const json = JSON.stringify({ address, status, data });
@@ -509,7 +509,7 @@ export function handleOsc({ address, args, from }) {
     case 'pause': e.pauseAll(); break;
     case 'resume': e.resumeAll(); break;
     case 'reset': e.reset(); break;
-    case 'version': oscReply(from, address, 'NomadQlab 0.1'); break;
+    case 'version': oscReply(from, address, 'NomadCue 0.1'); break;
     case 'playhead':
       if (rest[0] === 'next') e.movePlayhead(1);
       else if (rest[0] === 'previous') e.movePlayhead(-1);

@@ -1,45 +1,38 @@
-# NomadQlab
+# NomadCue
+
+<p align="center"><img src="build/icon.png" width="128" alt="NomadCue icon"></p>
 
 **Free, open-source, cross-platform show control for theatre, live events and installations.**
-Audio, video, lighting, OSC, MIDI, timecode, scripting and a phone remote, with every feature unlocked.
+Audio, video, lighting, OSC, MIDI, timecode, scripting and a phone remote. Every feature is included, with no licences, tiers or limits.
 
-NomadQlab is modelled on the cue-based workflow of [QLab](https://qlab.app) by Figure 53 (cue lists, a GO button, a playhead, pre-wait/post-wait, auto-continue/auto-follow, fades that target other cues) and runs on **macOS, Windows and Linux**.
-
-> NomadQlab is an independent project. It is not affiliated with, endorsed by, or connected to Figure 53, LLC. "QLab" is a trademark of Figure 53. NomadQlab cannot open `.qlab5` workspace files.
+Build a list of cues, press **GO**, and NomadCue runs your show: sound, projection, lights and network commands, all timed and linked together. It runs on **macOS, Windows and Linux**.
 
 ---
 
-## Paid QLab tiers vs. NomadQlab (free)
+## Everything included, free
 
-QLab's free tier is limited. Full audio, video and lighting each need a separate paid licence (perpetual or daily rental). Here is what each limit looks like in NomadQlab:
-
-| Area | QLab free tier | QLab paid licence | NomadQlab |
-|---|---|---|---|
-| Audio output channels | 2 | 128 (Audio licence) | **As many as your interface exposes** (Web Audio, tested up to the device max) |
-| Channels per audio file | 2 | 24 | **Any** (full crosspoint matrix per cue) |
-| Audio fades, rate fades | – | Audio licence | **Free** |
-| Per-cue output levels & matrix | – | Audio licence | **Free** |
-| Audio effects | – | Audio licence | **Free:** HPF/LPF, 3-band EQ, compressor, delay, reverb per cue |
-| Waveform & slice editing | – | Audio licence | **Free** (click to set start / ⌥-click to set end, unlimited loops) |
-| Mic cues (live input) | – | Audio licence | **Free** |
-| Video stages | 1 single-output | Unlimited (Video licence) | **Unlimited stages on any display** |
-| Video fades, geometry, opacity | – | Video licence | **Free** |
-| Blend modes | – | Video licence | **Free** (16 modes) |
-| Video effects | – | Video licence | **Free** (blur, brightness, contrast, saturation, hue, grayscale, invert, sepia) |
-| Masking / crop | – | Video licence | **Free** |
-| Keystone / corner-pin warp, edge blending | – | Video licence | **Free** |
-| Camera cues, Text cues | – | Video licence | **Free** |
-| DMX addresses | 16 | Unlimited (Lighting licence) | **Unlimited** (Art-Net & sACN/E1.31, unlimited universes) |
-| Light dashboard, command language, groups | partial | Lighting licence | **Free** |
-| RGB / RGBW / moving-head instruments | – | Lighting licence | **Free** |
-| OSC / MIDI / MSC remote control | – | paid | **Free** (QLab-style OSC addresses on UDP 53000) |
-| Network (OSC/UDP) cues | – | paid | **Free** |
-| MIDI, MIDI File, Timecode (MTC) cues | – | paid | **Free** |
-| iOS remote app | – | paid licence on host | **Free web remote** for any phone, tablet or laptop browser |
-| Unlimited cue lists & carts | – | paid | **Free** |
-| Pause, Devamp, Target, Arm/Disarm, Script cues | – | paid | **Free** (Script cues use JavaScript) |
-| Automatic workspace backups | – | paid | **Free** (timestamped backups + autosave) |
-| Platforms | macOS only | macOS only | **macOS, Windows, Linux** |
+| Area | NomadCue |
+|---|---|
+| Audio outputs | As many channels as your audio interface exposes |
+| Channels per audio file | Any; full crosspoint routing matrix per cue |
+| Audio fades | Level, per-output level and playback-rate fades with 5 curve shapes |
+| Audio effects | High/low-pass filters, 3-band EQ, compressor, delay, reverb on every cue |
+| Editing | Waveform view, slices (start/end points), unlimited or counted loops |
+| Live input | Mic cues with effects and routing |
+| Video outputs | Unlimited stages on any display, windowed or fullscreen |
+| Video looks | Opacity, position, scale, rotation, 16 blend modes, layering |
+| Video effects | Blur, brightness, contrast, saturation, hue, grayscale, invert, sepia |
+| Projection tools | Crop/masking, corner-pin keystone warp, edge blending |
+| Live video & titles | Camera cues and text cues |
+| Lighting | Unlimited DMX addresses and universes over Art-Net and sACN (E1.31) |
+| Lighting tools | Light dashboard, text command language, groups, RGB/RGBW/moving-head instruments |
+| Remote control | OSC (UDP 53000), plain-text UDP, MIDI, MIDI Show Control |
+| Outgoing control | Network (OSC/UDP), MIDI, MIDI File and MIDI Timecode cues |
+| Phone remote | Built-in web remote for any phone, tablet or laptop browser |
+| Organisation | Unlimited cue lists and cart (sound-pad) grids |
+| Logic | Pause, Devamp, Target, Arm/Disarm, GoTo and JavaScript Script cues |
+| Safety | Timestamped backups on every save, autosave, double-GO protection, show mode |
+| Platforms | macOS (Intel & Apple Silicon), Windows, Linux |
 
 Not implemented yet: multi-machine collaboration, NDI/Syphon I/O, object/spatial audio, LTC timecode, Stream Deck plugin. Contributions welcome.
 
@@ -66,7 +59,7 @@ Audio · Mic · Video (and still images) · Camera · Text · Light · Fade · N
 - **Bundle Workspace** copies all media next to the workspace. Paths are saved relative to the workspace, so the whole folder moves between machines.
 
 ### Control
-- **OSC** in on UDP 53000 (QLab-style addresses), with replies on 53001. **Plain-text UDP** on 53535.
+- **OSC** in on UDP 53000, with replies on 53001. **Plain-text UDP** on 53535.
 - **MIDI** triggers per cue (with MIDI Learn), plus global GO/Panic notes. **MIDI Show Control** receive and send.
 - **Web remote:** open `http://<your-ip>:53100` on any device for GO, Panic, playhead control, firing cues and running times. Optional passcode.
 
@@ -106,14 +99,14 @@ if (!nq.isRunning('1')) nq.go();
 ## Install
 
 ### Download
-Pre-built installers for macOS (`.dmg`), Windows (`.exe`) and Linux (`.AppImage`, `.deb`) are attached to each [GitHub Release](https://github.com/faridmasjedi/NomadQlab/releases). The builds are unsigned:
+Pre-built installers for macOS (`.dmg`, Intel and Apple Silicon), Windows (`.exe` installer or portable) and Linux (`.AppImage`, `.deb`) are attached to each [GitHub Release](https://github.com/faridmasjedi/NomadCue/releases/latest). The builds are unsigned:
 - **macOS:** right-click the app, choose **Open**, then confirm (first launch only).
 - **Windows:** SmartScreen → **More info** → **Run anyway**.
 
 ### Run from source
 ```bash
-git clone https://github.com/faridmasjedi/NomadQlab.git
-cd NomadQlab
+git clone https://github.com/faridmasjedi/NomadCue.git
+cd NomadCue
 npm install
 npm start
 ```
@@ -122,10 +115,20 @@ npm start
 ```bash
 npm run dist:mac     # or dist:win / dist:linux
 ```
-To have GitHub Actions build all three platforms and publish a Release, push a tag:
+
+## Contributing
+`main` is protected: every change goes through a pull request, CI must pass, and the code owner reviews it.
+
+1. Fork, or create a branch: `git checkout -b feature/my-change`
+2. Make your change and run the checks locally (below).
+3. Open a pull request against `main`.
+
+### Releasing (maintainer)
+Bump `version` in `package.json` through a PR, then tag the merged commit:
 ```bash
-git tag v0.1.0 && git push origin v0.1.0
+git tag v0.2.0 && git push origin v0.2.0
 ```
+The **Release** workflow builds macOS, Windows and Linux installers and publishes them as a GitHub Release.
 
 ## Development
 ```bash
