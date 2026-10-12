@@ -1,62 +1,100 @@
 name: Release
 
-# Push a tag like v0.2.0 (matching package.json "version") to build and publish installers.
+# Two ways to release:
+#   1. Actions → Release → "Run workflow", type a version like 1.0.0 (or v1.0.0).
+#      The tag v1.0.0 is created on the selected branch's latest commit (if it doesn't exist yet).
+#   2. Push a tag yourself:  git tag v1.0.0 && git push origin v1.0.0
+# Installers are built with that version number, so package.json doesn't need editing.
 on:
   push:
     tags: ['v*']
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Existing tag to (re)build, e.g. v0.1.0'
+      version:
+        description: 'Version to release, e.g. 1.0.0'
         required: true
 
 permissions:
   contents: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
-  verify:
+  prepare:
+    name: Prepare version & tag
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ steps.tag.outputs.tag }}
+      tag: ${{ steps.v.outputs.tag }}
+      version: ${{ steps.v.outputs.version }}
     steps:
-      - id: tag
-        run: echo "tag=${{ github.event.inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+      - name: Work out the version
+        id: v
+        env:
+          RAW: ${{ github.event.inputs.version || github.ref_name }}
+        run: |
+          v="${RAW#v}"; v="${v#V}"; v="$(echo "$v" | tr -d '[:space:]')"
+          if ! echo "$v" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error title=Invalid version::'$RAW' is not a version like 1.0.0 or 1.0.0-beta.1"
+            exit 1
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "tag=v$v" >> "$GITHUB_OUTPUT"
+          echo "Releasing version $v (tag v$v)"
+
       - uses: actions/checkout@v4
-        with: { ref: '${{ steps.tag.outputs.tag }}' }
+
+      - name: Create the tag if it doesn't exist
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TAG: ${{ steps.v.outputs.tag }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG already exists — rebuilding it."
+          else
+            git tag "$TAG" "$GITHUB_SHA"
+            git push origin "refs/tags/$TAG"
+            echo "Created tag $TAG on $GITHUB_SHA ($GITHUB_REF_NAME)"
+          fi
+
+  test:
+    name: Tests
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: 'refs/tags/${{ needs.prepare.outputs.tag }}' }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
-      - name: Tag must match package.json version
-        run: |
-          v=$(node -p "require('./package.json').version")
-          [ "v$v" = "${{ steps.tag.outputs.tag }}" ] || { echo "Tag ${{ steps.tag.outputs.tag }} != package.json v$v"; exit 1; }
       - run: npm ci
       - run: npm test
 
   build:
-    needs: verify
+    name: Build (${{ matrix.name }})
+    needs: [prepare, test]
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: macos-latest
-            args: --mac
-          - os: windows-latest
-            args: --win
-          - os: ubuntu-latest
-            args: --linux
+          - { name: macOS, os: macos-latest, args: --mac }
+          - { name: Windows, os: windows-latest, args: --win }
+          - { name: Linux, os: ubuntu-latest, args: --linux }
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-        with: { ref: '${{ needs.verify.outputs.tag }}' }
+        with: { ref: 'refs/tags/${{ needs.prepare.outputs.tag }}' }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      - run: npx electron-builder ${{ matrix.args }} --publish never
+      - name: Build installers
+        shell: bash
+        run: npx electron-builder ${{ matrix.args }} --publish never -c.extraMetadata.version=${{ needs.prepare.outputs.version }}
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
       - uses: actions/upload-artifact@v4
         with:
-          name: dist-${{ matrix.os }}
+          name: dist-${{ matrix.name }}
           if-no-files-found: error
           path: |
             dist/*.dmg
@@ -66,19 +104,20 @@ jobs:
             dist/*.deb
 
   publish:
-    needs: [verify, build]
+    name: Publish GitHub Release
+    needs: [prepare, build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with: { path: artifacts, merge-multiple: true }
-      - name: Create GitHub Release
+      - name: Create or update the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ needs.verify.outputs.tag }}
+          TAG: ${{ needs.prepare.outputs.tag }}
         run: |
           ls -la artifacts
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$TAG" artifacts/* --clobber --repo "$GITHUB_REPOSITORY"
           else
-            gh release create "$TAG" artifacts/* --repo "$GITHUB_REPOSITORY" --title "NomadCue $TAG" --generate-notes
+            gh release create "$TAG" artifacts/* --repo "$GITHUB_REPOSITORY" --title "NomadCue $TAG" --generate-notes --verify-tag
           fi
