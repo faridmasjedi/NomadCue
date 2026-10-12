@@ -2,11 +2,13 @@
 import {
   app, boot, render, go, panic, hardStop, select, moveSelection, addCue, deleteSelected, duplicateSelected, groupSelected,
   renumberSelected, moveCues, moveCuesToList, addFiles, isBroken, viewList, showList, addList, deleteList, change, undo, redo,
-  save, newWorkspace, openWorkspace, bundleWorkspace, fireCue, selectedCues, log,
+  save, newWorkspace, openWorkspace, bundleWorkspace, fireCue, selectedCues, log, setWait, moveUpDown, copySelected, cutSelected, paste,
 } from './app.js';
-import { walk, CUE_TYPES, TOOLBAR_ORDER, cueSummary, findCue } from './lib/model.js';
+import { openCueMenu, openListMenu, openTransitionMenu, createCueInteractive, addCueMenu } from './menus.js';
+import { showMenu, closeMenu, isMenuOpen } from './lib/contextmenu.js';
+import { walk, CUE_TYPES, TOOLBAR_ORDER, CONTINUE_MODES, cueSummary, findCue } from './lib/model.js';
 import { h, clear } from './lib/dom.js';
-import { formatTime } from './lib/util.js';
+import { formatTime, parseTime } from './lib/util.js';
 import { renderInspector } from './inspector.js';
 import { openSettings, openLightDashboard, openLog, openMeters } from './settings.js';
 import { runSelfTest, showDemo } from './selftest.js';
@@ -32,12 +34,7 @@ function renderToolbar() {
     const def = CUE_TYPES[type];
     bar.appendChild(h('button', {
       class: `tool t-${type}`, title: `New ${def.label} cue`, draggable: true,
-      onClick: async () => {
-        if (type === 'audio' || type === 'video' || type === 'midifile') {
-          const files = await window.nq.chooseMedia(type === 'midifile' ? 'midi' : type, true);
-          if (files.length) addFiles(files); else addCue(type);
-        } else addCue(type);
-      },
+      onClick: () => createCueInteractive(type),
     }, h('span', { class: 'glyph' }, def.glyph), h('span', { class: 'lbl' }, def.label)));
   }
 }
@@ -71,7 +68,7 @@ function renderSidebar() {
 
 // ------------------------------------------------------------------ cue list
 
-const COLS = ['', '', '', 'Number', 'Name', 'Target', 'Pre-wait', 'Action', 'Post-wait', ''];
+const COLS = ['', '', '', 'Number', 'Name', 'Target', 'Pre-wait', 'Action', 'Post-wait', 'Then'];
 
 function rowStatus(cue) {
   const runs = app.engine.runsFor(cue.id);
@@ -103,7 +100,7 @@ function staticDuration(cue) {
   return null;
 }
 
-function contGlyph(mode) { return mode === 'auto-continue' ? '↓' : mode === 'auto-follow' ? '⇣' : ''; }
+function contLabel(mode) { return mode === 'auto-continue' ? '↓ continue' : mode === 'auto-follow' ? '⇣ follow' : 'GO'; }
 
 function renderCueList() {
   const list = viewList();
@@ -111,18 +108,25 @@ function renderCueList() {
   pane.classList.toggle('cart', list.kind === 'cart');
   if (list.kind === 'cart') { renderCart(list, pane); return; }
   pane.appendChild(h('div', { class: 'row header' }, COLS.map((c) => h('div', {}, c))));
-  const body = h('div', { class: 'rows' });
+  const body = h('div', { class: 'rows', onContextmenu: (e) => { if (!e.target.closest('.row')) openListMenu(e); } });
   pane.appendChild(body);
   if (!list.cues.length) {
     body.appendChild(h('div', { class: 'empty' },
       h('div', { class: 'empty-title' }, 'This cue list is empty'),
-      h('div', {}, 'Drag audio, video or image files here, or use the toolbar above. Press ', h('kbd', {}, 'Space'), ' to GO.')));
+      h('div', {}, 'Drag audio, video or image files here, use the toolbar above, or right-click for options. Press ', h('kbd', {}, 'Space'), ' to GO.')));
   }
   const hidden = new Set();
   for (const { cue, parent, depth } of walk(list.cues)) {
     if (parent && (hidden.has(parent.id) || parent.collapsed)) { hidden.add(cue.id); continue; }
-    body.appendChild(cueRow(cue, depth));
+    const sibs = parent ? parent.children : list.cues;
+    const i = sibs.indexOf(cue);
+    const row = cueRow(cue, depth);
+    // Visual chain: a line links cues that start each other automatically.
+    if (cue.continueMode !== 'none' && sibs[i + 1]) row.classList.add('links-down');
+    if (i > 0 && sibs[i - 1].continueMode !== 'none') row.classList.add('linked-up');
+    body.appendChild(row);
   }
+  body.appendChild(h('div', { class: 'list-tail', onClick: () => select(null) }, list.cues.length ? 'Right-click a cue for options · double-click Pre-wait / Post-wait to edit · click “Then” to choose what happens next' : ''));
 }
 
 function cueRow(cue, depth) {
@@ -135,7 +139,13 @@ function cueRow(cue, depth) {
       !cue.armed && 'disarmed', cue.type === 'group' && 'group', cue.flagged && 'flagged'].filter(Boolean).join(' '),
     dataset: { id: cue.id }, draggable: true,
     onMousedown: (e) => { if (e.button === 0 && !e.target.closest('input,button')) select(cue.id, { add: e.metaKey || e.ctrlKey, range: e.shiftKey }); },
-    onDblclick: (e) => { if (!e.target.closest('.c-name')) return; editInline(row.querySelector('.c-name'), cue, 'name'); },
+    onDblclick: (e) => {
+      if (e.target.closest('.c-pre')) return editTime(row.querySelector('.c-pre'), cue, 'preWait');
+      if (e.target.closest('.c-post')) return editTime(row.querySelector('.c-post'), cue, 'postWait');
+      if (e.target.closest('.c-name')) return editInline(row.querySelector('.c-name'), cue, 'name');
+      if (e.target.closest('.c-num')) return editInline(row.querySelector('.c-num'), cue, 'number');
+    },
+    onContextmenu: (e) => openCueMenu(e, cue),
     onDragstart: (e) => {
       const ids = app.selection.has(cue.id) ? [...app.selection] : [cue.id];
       e.dataTransfer.setData('nq/cues', JSON.stringify(ids));
@@ -166,13 +176,15 @@ function cueRow(cue, depth) {
   h('div', { class: 'c-name', style: { paddingLeft: depth * 18 + 'px' } },
     cue.type === 'group' ? h('span', { class: 'twisty', onMousedown: (e) => { e.stopPropagation(); change(() => { cue.collapsed = !cue.collapsed; }); } }, cue.collapsed ? '▸' : '▾') : null,
     h('span', { class: 'name-text' }, cueSummary(cue, app.ws)),
+    cue.type === 'group' ? h('button', { class: 'add-inside', title: 'Add a cue inside this group', onMousedown: (e) => e.stopPropagation(),
+      onClick: (e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); showMenu(r.left, r.bottom, addCueMenu({ inside: cue.id })); } }, '+ add inside') : null,
     cue.notes ? h('span', { class: 'has-notes', title: cue.notes }, '¶') : null,
     cue.hotkey ? h('kbd', { class: 'hk' }, cue.hotkey) : null),
   h('div', { class: 'c-target' }, targetText(cue)),
-  h('div', { class: 'c-time c-pre' }, cue.preWait ? formatTime(cue.preWait) : ''),
+  h('div', { class: 'c-time c-pre', title: 'Double-click to edit pre-wait' }, cue.preWait ? formatTime(cue.preWait) : ''),
   h('div', { class: 'c-time c-action' }, dur === null ? '' : dur === Infinity ? '∞' : formatTime(dur)),
-  h('div', { class: 'c-time c-post' }, cue.continueMode === 'auto-continue' && cue.postWait ? formatTime(cue.postWait) : ''),
-  h('div', { class: 'c-cont', title: cue.continueMode }, contGlyph(cue.continueMode)),
+  h('div', { class: 'c-time c-post', title: 'Double-click to edit post-wait' }, cue.continueMode === 'auto-continue' && cue.postWait ? formatTime(cue.postWait) : ''),
+  h('div', { class: `c-cont m-${cue.continueMode}`, title: `${CONTINUE_MODES.find((m) => m.value === cue.continueMode)?.label} — click to change`, onMousedown: (e) => e.stopPropagation(), onClick: (e) => openTransitionMenu(e, cue) }, contLabel(cue.continueMode)),
   h('div', { class: 'progress' }));
   return row;
 }
@@ -188,6 +200,23 @@ function editInline(cell, cue, key) {
   input.select();
 }
 
+function editTime(cell, cue, key) {
+  if (app.ws.settings.general.showMode) return;
+  const input = h('input', { class: 'inline-edit time', value: formatTime(cue[key] || 0) });
+  let finished = false;
+  const done = (ok) => {
+    if (finished) return;
+    finished = true;
+    if (ok && parseTime(input.value) !== (cue[key] || 0)) setWait(app.selection.has(cue.id) ? [...app.selection] : [cue.id], key, parseTime(input.value));
+    else render();
+  };
+  input.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') done(true); if (e.key === 'Escape') done(false); });
+  input.addEventListener('blur', () => done(true));
+  cell.replaceChildren(input);
+  input.focus();
+  input.select();
+}
+
 function renderCart(list, pane) {
   const grid = h('div', { class: 'cart-grid' });
   for (const cue of list.cues) {
@@ -196,6 +225,7 @@ function renderCart(list, pane) {
       class: ['tile', `c-${cue.color}`, status, app.selection.has(cue.id) && 'selected', isBroken(cue) && 'broken'].filter(Boolean).join(' '),
       dataset: { id: cue.id }, draggable: true,
       onClick: (e) => { if (e.altKey || e.metaKey || e.ctrlKey) select(cue.id, { add: e.metaKey || e.ctrlKey }); else fireCue(cue.id); },
+      onContextmenu: (e) => openCueMenu(e, cue),
       onDragstart: (e) => e.dataTransfer.setData('nq/cues', JSON.stringify([cue.id])),
       onDragover: (e) => { if (e.dataTransfer.types.includes('nq/cues')) e.preventDefault(); },
       onDrop: (e) => { e.preventDefault(); moveCues(JSON.parse(e.dataTransfer.getData('nq/cues')), cue.id, 'before'); },
@@ -206,7 +236,8 @@ function renderCart(list, pane) {
     cue.hotkey ? h('kbd', { class: 'hk' }, cue.hotkey) : null,
     h('div', { class: 'progress' })));
   }
-  if (!list.cues.length) grid.appendChild(h('div', { class: 'empty' }, 'Empty cart. Add cues with the toolbar or drop files here. Click a tile to fire it, ⌥-click or ✎ to edit.'));
+  if (!list.cues.length) grid.appendChild(h('div', { class: 'empty' }, 'Empty cart. Add cues with the toolbar, drop files here, or right-click. Click a tile to fire it, ⌥-click or ✎ to edit.'));
+  grid.addEventListener('contextmenu', (e) => { if (!e.target.closest('.tile')) openListMenu(e); });
   pane.appendChild(grid);
 }
 
@@ -288,6 +319,7 @@ function inEditable(e) {
 }
 
 function onKey(e) {
+  if (isMenuOpen()) return;
   if (document.querySelector('.modal-overlay') && e.key !== 'Escape') return;
   const mod = e.metaKey || e.ctrlKey;
   if (e.key === 'Escape' && !document.querySelector('.modal-overlay')) {
@@ -303,6 +335,8 @@ function onKey(e) {
   const showMode = app.ws.settings.general.showMode;
   switch (true) {
     case e.key === ' ': e.preventDefault(); if (!e.repeat) go(); break;
+    case e.key === 'ArrowUp' && e.altKey && !showMode: e.preventDefault(); moveUpDown([...app.selection], -1); break;
+    case e.key === 'ArrowDown' && e.altKey && !showMode: e.preventDefault(); moveUpDown([...app.selection], 1); break;
     case e.key === 'ArrowDown' && !mod: e.preventDefault(); if (showMode) app.engine.movePlayhead(1); else moveSelection(1); break;
     case e.key === 'ArrowUp' && !mod: e.preventDefault(); if (showMode) app.engine.movePlayhead(-1); else moveSelection(-1); break;
     case (e.key === 'Backspace' || e.key === 'Delete') && !showMode: e.preventDefault(); deleteSelected(); break;
@@ -343,6 +377,12 @@ function wire() {
   $('addCartBtn').addEventListener('click', () => addList('cart'));
   $('miniMeters').addEventListener('click', () => openMeters());
   document.addEventListener('keydown', onKey);
+  // Cue copy / cut / paste via the standard Edit menu shortcuts (text fields keep normal behaviour).
+  const editableTarget = () => { const a = document.activeElement; return a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.isContentEditable); };
+  document.addEventListener('copy', (e) => { if (!editableTarget() && copySelected()) e.preventDefault(); });
+  document.addEventListener('cut', (e) => { if (!editableTarget() && !app.ws.settings.general.showMode) { cutSelected(); e.preventDefault(); } });
+  document.addEventListener('paste', (e) => { if (!editableTarget() && app.clipboard && !app.ws.settings.general.showMode) { paste(); e.preventDefault(); } });
+  document.getElementById('cuelist').addEventListener('scroll', closeMenu);
 
   // file drag & drop (anywhere)
   document.addEventListener('dragover', (e) => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); document.body.classList.add('dropping'); } });

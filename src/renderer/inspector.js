@@ -1,7 +1,7 @@
 // Inspector: edits the selected cue(s). Multi-selection edits shared fields on every selected cue.
 import { app, render, snapshot, markDirty, selectedCues, checkMedia, fireCue, change } from './app.js';
 import {
-  CUE_TYPES, CONTINUE_MODES, CUE_COLORS, BLEND_MODES, FADE_CURVES, GROUP_MODES, MSC_COMMANDS, walk, cueSummary, findCue,
+  CUE_TYPES, CUE_COLORS, BLEND_MODES, FADE_CURVES, GROUP_MODES, MSC_COMMANDS, walk, cueSummary, findCue,
 } from './lib/model.js';
 import { h, clear } from './lib/dom.js';
 import { formatTime, parseTime } from './lib/util.js';
@@ -457,17 +457,70 @@ function midiTab(cues, one) {
     one ? h('button', { onClick: () => app.midi.sendCue(one) }, 'Send now') : null);
 }
 
+const TRANSITIONS = [
+  { value: 'none', icon: '■', title: 'Wait for GO', desc: 'Stop here. The next cue waits until you press GO.' },
+  { value: 'auto-continue', icon: '↓', title: 'Auto-continue', desc: 'Start the next cue after the post-wait, counted from when this cue starts.' },
+  { value: 'auto-follow', icon: '⇣', title: 'Auto-follow', desc: 'Start the next cue as soon as this cue finishes.' },
+];
+
+function nextCueOf(cue) {
+  const f = findCue(app.ws, cue.id);
+  if (!f) return null;
+  const sibs = f.parent ? f.parent.children : f.list.cues;
+  return sibs[sibs.indexOf(cue) + 1] || null;
+}
+
+// Plain-English description of what this cue does over time.
+function timelineSentence(cue) {
+  const name = (c) => `“${c.number ? c.number + ' · ' : ''}${cueSummary(c, app.ws)}”`;
+  const parts = [];
+  parts.push(cue.preWait > 0 ? `After GO, wait ${formatTime(cue.preWait)}, then start ${name(cue)}.` : `GO starts ${name(cue)} immediately.`);
+  const next = nextCueOf(cue);
+  if (cue.continueMode === 'auto-continue') {
+    parts.push(next ? `${cue.postWait > 0 ? formatTime(cue.postWait) + ' after it starts' : 'At the same moment'}, ${name(next)} starts automatically.` : 'There is no next cue to continue to.');
+  } else if (cue.continueMode === 'auto-follow') {
+    parts.push(next ? `When it finishes, ${name(next)} starts automatically.` : 'There is no next cue to follow.');
+  } else {
+    parts.push(next ? `Then the playhead waits on ${name(next)} for the next GO.` : 'This is the last cue in the sequence.');
+  }
+  return parts.join(' ');
+}
+
+function timelineBar(cue) {
+  const pre = Number(cue.preWait) || 0;
+  const post = cue.continueMode === 'auto-continue' ? Number(cue.postWait) || 0 : 0;
+  const total = Math.max(1, pre + Math.max(post, 2));
+  const seg = (cls, w, label) => h('div', { class: `tl-seg ${cls}`, style: { flex: String(Math.max(w, 0.0001)) } }, label);
+  return h('div', { class: 'timeline' },
+    h('div', { class: 'tl-go' }, 'GO'),
+    pre > 0 ? seg('tl-pre', pre / total, `pre-wait ${formatTime(pre)}`) : null,
+    seg('tl-action', Math.max(post, 2) / total, 'this cue ' + (cue.continueMode === 'auto-continue' ? `· next in ${formatTime(post)}` : '')),
+    h('div', { class: `tl-next m-${cue.continueMode}` }, cue.continueMode === 'none' ? '■ wait for GO' : cue.continueMode === 'auto-follow' ? '⇣ next when done' : '↓ next'));
+}
+
 function basicsTab(cues) {
   const one = cues.length === 1 ? cues[0] : null;
+  const mode = shared(cues, 'continueMode');
   return h('div', { class: 'basics' },
     row(field('Number', textInput(cues, 'number')), h('div', { class: 'grow' }, field('Name', textInput(cues, 'name', { placeholder: one ? cueSummary({ ...one, name: '' }, app.ws) : '' })))),
-    row(field('Pre-wait', timeInput(cues, 'preWait')),
-      field('Post-wait', timeInput(cues, 'postWait')),
-      field('Continue', selectInput(cues, 'continueMode', CONTINUE_MODES)),
-      field('Color', h('div', { class: 'colors' }, CUE_COLORS.map((c) => h('button', {
-        class: `swatch c-${c}${shared(cues, 'color') === c ? ' on' : ''}`, title: c, onClick: () => setField(cues, 'color', c),
-      }))))),
-    row(checkbox(cues, 'armed', 'Armed'), checkbox(cues, 'flagged', 'Flagged')),
+    section('Timing & transition to the next cue',
+      h('div', { class: 'transition-picker' }, TRANSITIONS.map((t) => h('button', {
+        class: 'transition-opt' + (mode === t.value ? ' on' : ''), title: t.desc,
+        onClick: () => setField(cues, 'continueMode', t.value),
+      }, h('span', { class: 't-icon' }, t.icon), h('span', { class: 't-title' }, t.title), h('span', { class: 't-desc' }, t.desc)))),
+      row(field('Pre-wait (delay before this cue starts)', timeInput(cues, 'preWait')),
+        field('Post-wait (delay before the next cue, auto-continue)', (() => {
+          const el = timeInput(cues, 'postWait');
+          el.addEventListener('change', () => {
+            if (parseTime(el.value) > 0 && cues.some((c) => c.continueMode === 'none')) setField(cues.filter((c) => c.continueMode === 'none'), 'continueMode', 'auto-continue');
+          });
+          return el;
+        })())),
+      one ? timelineBar(one) : null,
+      one ? h('p', { class: 'sentence' }, timelineSentence(one)) : null),
+    row(field('Color', h('div', { class: 'colors' }, CUE_COLORS.map((c) => h('button', {
+      class: `swatch c-${c}${shared(cues, 'color') === c ? ' on' : ''}`, title: c, onClick: () => setField(cues, 'color', c),
+    })))), checkbox(cues, 'armed', 'Armed'), checkbox(cues, 'flagged', 'Flagged')),
     field('Notes', textInput(cues, 'notes', { multiline: true, rows: 3 })));
 }
 

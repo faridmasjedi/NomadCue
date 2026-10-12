@@ -53,8 +53,13 @@ Audio · Mic · Video (and still images) · Camera · Text · Light · Fade · N
 - **Carts:** grid pads for SFX, with per-cue hotkeys.
 
 ### Editing
-- Drag and drop media files to create cues. Drag cues to reorder them, drop them into groups, or move them to other lists.
-- Multi-select editing, undo/redo, duplicate, group the selection (⌘G), renumber.
+- **Right-click any cue** for everything in one place: play/stop, add a cue after it or inside a group, paste, transition ("Then"), pre-wait and post-wait presets, fades, move up/down, move into or out of a group, move to another list, colour, arm/flag, rename, duplicate, copy/cut and delete. Right-click empty space to add cues or media.
+- **Transitions made simple.** Every cue has a **Then** column you can click: *Wait for GO*, *Auto-continue* (start the next cue after the post-wait) or *Auto-follow* (start the next cue when this one ends). Linked cues are joined by a line, so you can see sequences at a glance.
+- **Double-click Pre-wait or Post-wait** in the list to type a time. Setting a post-wait switches the cue to auto-continue automatically.
+- The Inspector's **Timing & transition** section shows a timeline and a plain-English summary, e.g. *"GO starts 'Thunder' immediately. 2 s after it starts, 'Lights' starts automatically."*
+- **One-click fades:** *Add fade-out after* and *Crossfade into next cue*. One GO fades the current cue out while the next fades in.
+- Drag and drop media files to create cues. Drag cues to reorder them, onto the middle of a group to put them inside, or onto another list. Groups show a **+ add inside** button on hover.
+- Multi-select editing, undo/redo, copy/cut/paste cues, duplicate, group the selection (⌘G), renumber, move with ⌥↑/⌥↓.
 - Missing media and broken targets are flagged ⚠.
 - **Bundle Workspace** copies all media next to the workspace. Paths are saved relative to the workspace, so the whole folder moves between machines.
 
@@ -133,7 +138,7 @@ The **Release** workflow builds macOS, Windows and Linux installers and publishe
 ## Development
 ```bash
 npm test        # unit tests: engine, OSC, DMX packets, lighting language, MIDI files, model
-npm run smoke   # launches the real app headless and runs a 22-step end-to-end self-test
+npm run smoke   # launches the real app headless and runs a 34-step end-to-end self-test
 ```
 
 Project layout:
@@ -154,6 +159,9 @@ test/           node:test unit tests
 | ↑ / ↓ | Move selection (playhead in Show Mode) |
 | ⌘1–⌘9, ⌘0 | New Audio, Mic, Video, Camera, Text, Light, Fade, Network, MIDI, Group |
 | ⌘D / ⌘G | Duplicate / Group selection |
+| ⌘C / ⌘X / ⌘V | Copy / Cut / Paste cues |
+| ⌥↑ / ⌥↓ | Move cue up / down |
+| Right-click | Cue menu |
 | P / S / V | Pause, Stop, Audition selected |
 | Enter | Rename selected cue |
 | ⌘Z / ⌘⇧Z | Undo / Redo |

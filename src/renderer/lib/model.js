@@ -2,9 +2,9 @@
 import { uid, deepClone } from './util.js';
 
 export const CONTINUE_MODES = [
-  { value: 'none', label: 'Do not continue' },
-  { value: 'auto-continue', label: 'Auto-continue (after post-wait)' },
-  { value: 'auto-follow', label: 'Auto-follow (when cue ends)' },
+  { value: 'none', short: 'Wait for GO', label: 'Wait for GO (do not continue)' },
+  { value: 'auto-continue', short: 'Auto-continue', label: 'Auto-continue (start next after post-wait)' },
+  { value: 'auto-follow', short: 'Auto-follow', label: 'Auto-follow (start next when this ends)' },
 ];
 
 export const CUE_COLORS = ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'grey'];
