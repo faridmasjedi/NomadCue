@@ -135,11 +135,9 @@ npm run dist:mac     # or dist:win / dist:linux
 3. Open a pull request against `main`.
 
 ### Releasing (maintainer)
-Bump `version` in `package.json` through a PR, then tag the merged commit:
-```bash
-git tag v0.2.0 && git push origin v0.2.0
-```
-The **Release** workflow builds macOS, Windows and Linux installers and publishes them as a GitHub Release.
+Go to **Actions → Release → Run workflow**, type a version such as `1.0.0`, and run it. The workflow creates the tag `v1.0.0`, builds the macOS, Windows and Linux installers with that version, and publishes them as a GitHub Release.
+
+You can also push a tag yourself: `git tag v1.0.0 && git push origin v1.0.0`.
 
 ## Development
 ```bash
