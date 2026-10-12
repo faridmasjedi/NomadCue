@@ -44,17 +44,23 @@ Not implemented yet: multi-machine collaboration, NDI/Syphon I/O, object/spatial
 Audio · Mic · Video (and still images) · Camera · Text · Light · Fade · Network · MIDI · MIDI File · Timecode · Group · Start · Stop · Pause · Load · Reset · Devamp · GoTo · Target · Arm · Disarm · Wait · Memo · Script
 
 ### Show-running
-- **GO** (Space), **Panic** (Esc fades everything out; press Esc twice to hard stop), Pause/Resume all, Reset.
+- **GO** (Space) plays the cue under the playhead and moves to the next one. Click any cue, even one inside a group, to put the playhead there. Space works even after you've clicked a button or dropdown; it only types a space while you're in a text field.
+- **Panic** (Esc fades everything out; press Esc twice to hard stop), Pause/Resume all, Reset.
 - The playhead jumps over auto-continue/auto-follow sequences, as you'd expect.
 - Pre-wait, post-wait, **auto-continue** and **auto-follow**. Pausing freezes waits as well as media.
-- Groups can start their first child (which then chains), start all children at once, or start a random child.
+- Groups can **step through their children one GO at a time**, start their first child (which then chains), start all children at once, or start a random child.
 - Re-trigger policy per cue: ignore, restart, stop, or pause/resume.
 - Double-GO protection, **Show Mode** (locks editing), live progress and time remaining, Active Cues panel.
 - **Carts:** grid pads for SFX, with per-cue hotkeys.
 
 ### Editing
 - **Right-click any cue** for everything in one place: play/stop, add a cue after it or inside a group, paste, transition ("Then"), pre-wait and post-wait presets, fades, move up/down, move into or out of a group, move to another list, colour, arm/flag, rename, duplicate, copy/cut and delete. Right-click empty space to add cues or media.
-- **Transitions made simple.** Every cue has a **Then** column you can click: *Wait for GO*, *Auto-continue* (start the next cue after the post-wait) or *Auto-follow* (start the next cue when this one ends). Linked cues are joined by a line, so you can see sequences at a glance.
+- **Transitions made simple.** Every cue has a **Then** column you can click:
+  - *Wait for GO*: the next cue waits for you to press GO.
+  - *Start next with this* (auto-continue): the next cue starts after the post-wait, counted from when this cue starts. A post-wait of 0 starts them together.
+  - *Start next when done* (auto-follow): the next cue starts when this one finishes.
+
+  Linked cues are joined by a line, so you can see sequences at a glance. A ⚠ warns you when *Start next when done* can never fire because the cue never ends on its own (text held until stopped, a looping sound, a camera…). In that case GO moves on to the next cue instead.
 - **Double-click Pre-wait or Post-wait** in the list to type a time. Setting a post-wait switches the cue to auto-continue automatically.
 - The Inspector's **Timing & transition** section shows a timeline and a plain-English summary, e.g. *"GO starts 'Thunder' immediately. 2 s after it starts, 'Lights' starts automatically."*
 - **One-click fades:** *Add fade-out after* and *Crossfade into next cue*. One GO fades the current cue out while the next fades in.
@@ -138,7 +144,7 @@ The **Release** workflow builds macOS, Windows and Linux installers and publishe
 ## Development
 ```bash
 npm test        # unit tests: engine, OSC, DMX packets, lighting language, MIDI files, model
-npm run smoke   # launches the real app headless and runs a 34-step end-to-end self-test
+npm run smoke   # launches the real app headless and runs a 39-step end-to-end self-test
 ```
 
 Project layout:

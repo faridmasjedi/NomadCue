@@ -4,7 +4,7 @@ import {
   setContinueMode, setWait, setCueProp, moveIntoGroup, moveOutOfGroup, moveUpDown, moveCuesToList, addFadeOut, crossfadeToNext,
   copySelected, cutSelected, paste, viewList, render,
 } from './app.js';
-import { CUE_TYPES, CUE_COLORS, CONTINUE_MODES, walk, findCue, cueSummary, isDescendant, siblingsOf } from './lib/model.js';
+import { CUE_TYPES, CUE_COLORS, CONTINUE_MODES, GROUP_MODES, walk, findCue, cueSummary, isDescendant, siblingsOf, neverEnds, neverEndsReason } from './lib/model.js';
 import { showMenu } from './lib/contextmenu.js';
 import { promptDialog } from './lib/dom.js';
 import { parseTime, formatTime } from './lib/util.js';
@@ -54,14 +54,19 @@ function waitMenu(ids, key, current) {
 
 const CONTINUE_HELP = {
   none: 'Stop here — the next cue waits for GO',
-  'auto-continue': 'Start the next cue after the post-wait (counted from when this cue starts)',
-  'auto-follow': 'Start the next cue as soon as this cue finishes',
+  'auto-continue': 'Auto-continue: the next cue starts after the post-wait, counted from when this cue starts (0 = together)',
+  'auto-follow': 'Auto-follow: the next cue starts when this cue finishes',
 };
 
 export function transitionMenu(ids, cue) {
   const pw = cue.postWait || 0;
+  const stuck = neverEnds(cue);
   return [
-    ...CONTINUE_MODES.map((m) => ({ label: m.short, title: CONTINUE_HELP[m.value], checked: cue.continueMode === m.value, onClick: () => setContinueMode(ids, m.value) })),
+    ...CONTINUE_MODES.map((m) => ({
+      label: m.short + (m.value === 'auto-follow' && stuck ? '  ⚠ never ends' : ''),
+      title: m.value === 'auto-follow' && stuck ? `Won't fire: ${neverEndsReason(cue)}` : CONTINUE_HELP[m.value],
+      checked: cue.continueMode === m.value, onClick: () => setContinueMode(ids, m.value),
+    })),
     'separator',
     { label: `Post-wait: ${pw ? formatTime(pw) : 'none'}`, submenu: waitMenu(ids, 'postWait', pw) },
   ];
@@ -101,6 +106,7 @@ export function cueMenu(cue) {
     'separator',
     { label: 'Add cue after', icon: '+', submenu: typeMenu({ after: cue.id }) },
     one && cue.type === 'group' ? { label: 'Add cue inside this group', icon: '⤵', submenu: typeMenu({ inside: cue.id }) } : null,
+    one && cue.type === 'group' ? { label: 'Group mode', icon: '▦', submenu: GROUP_MODES.map((m) => ({ label: m.label, checked: cue.mode === m.value, onClick: () => setCueProp(ids, 'mode', m.value) })) } : null,
     app.clipboard ? { label: 'Paste after', shortcut: '⌘V', onClick: () => paste({ after: cue.id }) } : null,
     app.clipboard && one && cue.type === 'group' ? { label: 'Paste inside group', onClick: () => paste({ inside: cue.id }) } : null,
     'separator',

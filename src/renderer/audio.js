@@ -267,7 +267,7 @@ export class AudioPlayback extends BasePlayback {
         this.routing.master.gain.value = 0;
         rampParam(this.ctx, this.routing.master.gain, target, cue.fadeIn, 'scurve');
       }
-      this.startSource(this.offset);
+      if (!this.paused) this.startSource(this.offset); // paused while loading: wait for resume()
     }).catch((e) => {
       engine.log(`Audio cue ${cue.number || ''}: ${e.message}`);
       run.done();
@@ -330,7 +330,8 @@ export class AudioPlayback extends BasePlayback {
   }
 
   pause() {
-    if (!this.source || this.paused) return;
+    if (this.paused) return;
+    if (!this.source) { this.paused = true; this.pausedElapsed = 0; return; } // still loading
     this.pausedElapsed = this.elapsed();
     this.offset = this.position();
     this.paused = true;
@@ -342,7 +343,7 @@ export class AudioPlayback extends BasePlayback {
     if (!this.paused) return;
     this.paused = false;
     this.elapsedBefore = this.pausedElapsed;
-    this.startSource(this.offset);
+    if (this.buffer && !this.stopped) this.startSource(this.offset); // otherwise the loader starts it
   }
 
   devamp() {

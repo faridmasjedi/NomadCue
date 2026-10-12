@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { parseLightCommands, resolveLightCommands } from '../src/renderer/lib/lightcmd.js';
 import { parseMidiFile } from '../src/renderer/lib/smf.js';
-import { buildMidiMessage, buildMscMessage, parseMscMessage, normalizeWorkspace, createCue, cueAfterSequence, cloneCue } from '../src/renderer/lib/model.js';
+import { buildMidiMessage, buildMscMessage, parseMscMessage, normalizeWorkspace, createCue, cueAfterSequence, cloneCue, neverEnds } from '../src/renderer/lib/model.js';
 import { parseTime, formatTime, dbToGain, nextCueNumber } from '../src/renderer/lib/util.js';
 const require = createRequire(import.meta.url);
 const { encodeMessage, decodeMessage, parseOscString } = require('../src/main/osc.js');
@@ -71,4 +71,16 @@ test('model helpers', () => {
   g.children.push(createCue('start', { target: g.children[0].id }));
   const copy = cloneCue(g);
   assert.notEqual(copy.id, g.id); assert.equal(copy.children[1].target, copy.children[0].id);
+});
+
+test('neverEnds detects cues that can never auto-follow', () => {
+  assert.equal(neverEnds(createCue('text', { duration: 0 })), true);
+  assert.equal(neverEnds(createCue('text', { duration: 5 })), false);
+  assert.equal(neverEnds(createCue('audio', { loops: 0 })), true);
+  assert.equal(neverEnds(createCue('audio', { loops: 2 })), false);
+  assert.equal(neverEnds(createCue('video', { file: '/a.png', imageDuration: 0 })), true);
+  assert.equal(neverEnds(createCue('video', { file: '/a.mp4' })), false);
+  assert.equal(neverEnds(createCue('camera')), true);
+  assert.equal(neverEnds(createCue('light')), false);
+  assert.equal(neverEnds(createCue('group', { mode: 'all', children: [createCue('mic')] })), true);
 });

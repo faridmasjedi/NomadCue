@@ -2,9 +2,9 @@
 import { uid, deepClone } from './util.js';
 
 export const CONTINUE_MODES = [
-  { value: 'none', short: 'Wait for GO', label: 'Wait for GO (do not continue)' },
-  { value: 'auto-continue', short: 'Auto-continue', label: 'Auto-continue (start next after post-wait)' },
-  { value: 'auto-follow', short: 'Auto-follow', label: 'Auto-follow (start next when this ends)' },
+  { value: 'none', short: 'Wait for GO', label: 'Wait for GO — the next cue waits for you to press GO' },
+  { value: 'auto-continue', short: 'Start next with this', label: 'Start next with this (auto-continue) — next cue starts after the post-wait, counted from when this one starts' },
+  { value: 'auto-follow', short: 'Start next when done', label: 'Start next when done (auto-follow) — next cue starts when this one finishes' },
 ];
 
 export const CUE_COLORS = ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'grey'];
@@ -19,6 +19,7 @@ export const FADE_CURVES = [
 ];
 
 export const GROUP_MODES = [
+  { value: 'step', label: 'GO steps through the children one by one' },
   { value: 'first', label: 'Start first child; children follow their continue modes' },
   { value: 'all', label: 'Start all children simultaneously' },
   { value: 'random', label: 'Start a random child' },
@@ -126,6 +127,31 @@ export function normalizeWorkspace(ws) {
   return out;
 }
 
+// True when a cue never finishes on its own, so "start next when done" (auto-follow) could never fire.
+export function neverEnds(cue) {
+  switch (cue.type) {
+    case 'text': return !(Number(cue.duration) > 0);
+    case 'audio': return Number(cue.loops) === 0;
+    case 'video': return Number(cue.loops) === 0 || (/\.(png|jpe?g|gif|webp|svg)$/i.test(cue.file || '') && !(Number(cue.imageDuration) > 0));
+    case 'camera': case 'mic': return true;
+    case 'timecode': return !(Number(cue.duration) > 0);
+    case 'group': return cue.mode === 'all' && (cue.children || []).some(neverEnds);
+    default: return false;
+  }
+}
+
+export function neverEndsReason(cue) {
+  switch (cue.type) {
+    case 'text': return 'this text stays on screen until stopped (duration 0)';
+    case 'audio': case 'video': return Number(cue.loops) === 0 ? 'it loops forever' : 'the image is held until stopped (hold time 0)';
+    case 'camera': return 'a camera feed runs until stopped';
+    case 'mic': return 'a mic stays live until stopped';
+    case 'timecode': return 'timecode runs until stopped (duration 0)';
+    case 'group': return 'a cue inside this group never ends';
+    default: return '';
+  }
+}
+
 // ---- tree helpers
 
 export function* walk(cues, parent = null, depth = 0) {
@@ -187,10 +213,16 @@ export function mediaFiles(ws) {
 }
 
 // The cue a GO at `cue` lands on afterwards: skips over cues reached through auto-continue/auto-follow chains.
+// A "start next when done" on a cue that never ends can't fire, so it doesn't link to the next cue.
+export function linksToNext(cue) {
+  if (cue.continueMode === 'auto-continue') return true;
+  return cue.continueMode === 'auto-follow' && !neverEnds(cue);
+}
+
 export function cueAfterSequence(siblings, cueId) {
   let i = siblings.findIndex((c) => c.id === cueId);
   if (i < 0) return null;
-  while (i < siblings.length && siblings[i].continueMode !== 'none') i++;
+  while (i < siblings.length && linksToNext(siblings[i])) i++;
   return siblings[i + 1] || null;
 }
 

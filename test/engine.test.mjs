@@ -135,3 +135,45 @@ test('retrigger ignore vs restart', () => {
   a.retrigger = 'restart'; engine.trigger(a);
   assert.deepEqual(log, ['start:1', 'stop:1', 'start:1']);
 });
+
+test('step group: GO fires children one at a time, then leaves the group', () => {
+  const g = createCue('group', { number: '1', mode: 'step', children: [createCue('memo', { number: '1.1' }), createCue('memo', { number: '1.2' })] });
+  const after = createCue('memo', { number: '2' });
+  const { engine, log } = setup([g, after]);
+  engine.go();
+  assert.deepEqual(log, ['start:1.1']);
+  assert.equal(engine.playheadId, g.children[1].id);
+  engine.go();
+  assert.deepEqual(log, ['start:1.1', 'start:1.2']);
+  assert.equal(engine.playheadId, after.id);
+  engine.go();
+  assert.deepEqual(log, ['start:1.1', 'start:1.2', 'start:2']);
+});
+
+test('playhead on a child of a normal group continues to the cue after the group', () => {
+  const g = createCue('group', { number: '1', mode: 'first', children: [createCue('memo', { number: '1.1' }), createCue('memo', { number: '1.2' })] });
+  const after = createCue('memo', { number: '2' });
+  const { engine, log } = setup([g, after]);
+  engine.setPlayhead(g.children[1].id);
+  engine.go();
+  assert.deepEqual(log, ['start:1.2']);
+  assert.equal(engine.playheadId, after.id);
+});
+
+test('movePlayhead walks into step groups', () => {
+  const g = createCue('group', { number: '1', mode: 'step', children: [createCue('memo', { number: '1.1' })] });
+  const b = createCue('memo', { number: '2' });
+  const { engine } = setup([g, b]);
+  engine.movePlayhead(1);
+  assert.equal(engine.playheadId, g.children[0].id);
+  engine.movePlayhead(1);
+  assert.equal(engine.playheadId, b.id);
+});
+
+test('a follow that can never fire does not make GO skip the next cue', () => {
+  const t = createCue('text', { number: '1', duration: 0, continueMode: 'auto-follow' });
+  const l = createCue('memo', { number: '2' });
+  const { engine } = setup([t, l]);
+  engine.go();
+  assert.equal(engine.playheadId, l.id);
+});
