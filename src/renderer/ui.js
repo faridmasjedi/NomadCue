@@ -6,7 +6,7 @@ import {
 } from './app.js';
 import { openCueMenu, openListMenu, openTransitionMenu, createCueInteractive, addCueMenu } from './menus.js';
 import { showMenu, closeMenu, isMenuOpen } from './lib/contextmenu.js';
-import { walk, CUE_TYPES, TOOLBAR_ORDER, CONTINUE_MODES, cueSummary, findCue } from './lib/model.js';
+import { walk, CUE_TYPES, TOOLBAR_ORDER, CONTINUE_MODES, cueSummary, findCue, neverEnds, neverEndsReason, linksToNext } from './lib/model.js';
 import { h, clear } from './lib/dom.js';
 import { formatTime, parseTime } from './lib/util.js';
 import { renderInspector } from './inspector.js';
@@ -71,7 +71,9 @@ function renderSidebar() {
 const COLS = ['', '', '', 'Number', 'Name', 'Target', 'Pre-wait', 'Action', 'Post-wait', 'Then'];
 
 function rowStatus(cue) {
-  const runs = app.engine.runsFor(cue.id);
+  let runs = app.engine.runsFor(cue.id);
+  // A group shows as running while any cue inside it runs (e.g. children fired one by one in step mode).
+  if (!runs.length && cue.type === 'group') runs = [...app.engine.runs.values()].filter((r) => [...walk(cue.children)].some((x) => x.cue.id === r.cue.id));
   if (runs.some((r) => r.paused)) return 'paused';
   if (runs.some((r) => r.state === 'prewait')) return 'waiting';
   if (runs.length) return 'running';
@@ -85,7 +87,7 @@ function targetText(cue) {
     const t = cue.target && findCue(app.ws, cue.target)?.cue;
     return t ? (t.number || cueSummary(t, app.ws)) : '?';
   }
-  if (cue.type === 'group') return `${cue.children.length} cues`;
+  if (cue.type === 'group') return `${cue.children.length} cues · ${{ step: 'GO steps', first: 'chain', all: 'all at once', random: 'random' }[cue.mode] || ''}`;
   return '';
 }
 
@@ -100,7 +102,7 @@ function staticDuration(cue) {
   return null;
 }
 
-function contLabel(mode) { return mode === 'auto-continue' ? '↓ continue' : mode === 'auto-follow' ? '⇣ follow' : 'GO'; }
+function contLabel(mode) { return mode === 'auto-continue' ? '↓ with this' : mode === 'auto-follow' ? '⇣ when done' : 'GO'; }
 
 function renderCueList() {
   const list = viewList();
@@ -122,8 +124,8 @@ function renderCueList() {
     const i = sibs.indexOf(cue);
     const row = cueRow(cue, depth);
     // Visual chain: a line links cues that start each other automatically.
-    if (cue.continueMode !== 'none' && sibs[i + 1]) row.classList.add('links-down');
-    if (i > 0 && sibs[i - 1].continueMode !== 'none') row.classList.add('linked-up');
+    if (linksToNext(cue) && sibs[i + 1]) row.classList.add('links-down');
+    if (i > 0 && linksToNext(sibs[i - 1])) row.classList.add('linked-up');
     body.appendChild(row);
   }
   body.appendChild(h('div', { class: 'list-tail', onClick: () => select(null) }, list.cues.length ? 'Right-click a cue for options · double-click Pre-wait / Post-wait to edit · click “Then” to choose what happens next' : ''));
@@ -184,7 +186,14 @@ function cueRow(cue, depth) {
   h('div', { class: 'c-time c-pre', title: 'Double-click to edit pre-wait' }, cue.preWait ? formatTime(cue.preWait) : ''),
   h('div', { class: 'c-time c-action' }, dur === null ? '' : dur === Infinity ? '∞' : formatTime(dur)),
   h('div', { class: 'c-time c-post', title: 'Double-click to edit post-wait' }, cue.continueMode === 'auto-continue' && cue.postWait ? formatTime(cue.postWait) : ''),
-  h('div', { class: `c-cont m-${cue.continueMode}`, title: `${CONTINUE_MODES.find((m) => m.value === cue.continueMode)?.label} — click to change`, onMousedown: (e) => e.stopPropagation(), onClick: (e) => openTransitionMenu(e, cue) }, contLabel(cue.continueMode)),
+  (() => {
+    const stuck = cue.continueMode === 'auto-follow' && neverEnds(cue);
+    const title = stuck
+      ? `⚠ "Start next when done" will never fire: ${neverEndsReason(cue)}. Click to change.`
+      : `${CONTINUE_MODES.find((m) => m.value === cue.continueMode)?.label}. Click to change.`;
+    return h('div', { class: `c-cont m-${cue.continueMode}${stuck ? ' stuck' : ''}`, title, onMousedown: (e) => e.stopPropagation(), onClick: (e) => openTransitionMenu(e, cue) },
+      (stuck ? '⚠ ' : '') + contLabel(cue.continueMode));
+  })(),
   h('div', { class: 'progress' }));
   return row;
 }
@@ -313,9 +322,19 @@ function renderStatus() {
 
 // ------------------------------------------------------------------ keyboard
 
+const TEXT_INPUT_TYPES = new Set(['text', 'number', 'search', 'email', 'url', 'password', 'tel', 'time', 'date']);
+
+// Fields where the keyboard is being used for typing. Buttons, checkboxes, sliders and dropdowns
+// are NOT included, so Space still means GO after you click one of them.
+function isTyping(t) {
+  if (!t) return false;
+  if (t.isContentEditable || t.tagName === 'TEXTAREA') return true;
+  return t.tagName === 'INPUT' && TEXT_INPUT_TYPES.has((t.type || 'text').toLowerCase());
+}
+
 function inEditable(e) {
   const t = e.target;
-  return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
+  return isTyping(t) || (t && t.tagName === 'SELECT');
 }
 
 function onKey(e) {
@@ -326,6 +345,13 @@ function onKey(e) {
     if (inEditable(e)) { e.target.blur(); return; }
     e.preventDefault(); panic(); return;
   }
+  // Space is GO unless you are typing; it also takes focus away from buttons, dropdowns and checkboxes.
+  if (e.key === ' ' && !isTyping(e.target)) {
+    e.preventDefault();
+    if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+    if (!e.repeat) go();
+    return;
+  }
   if (inEditable(e)) return;
   // per-cue hotkeys
   if (!mod && e.key.length === 1 && e.key !== ' ') {
@@ -334,7 +360,6 @@ function onKey(e) {
   }
   const showMode = app.ws.settings.general.showMode;
   switch (true) {
-    case e.key === ' ': e.preventDefault(); if (!e.repeat) go(); break;
     case e.key === 'ArrowUp' && e.altKey && !showMode: e.preventDefault(); moveUpDown([...app.selection], -1); break;
     case e.key === 'ArrowDown' && e.altKey && !showMode: e.preventDefault(); moveUpDown([...app.selection], 1); break;
     case e.key === 'ArrowDown' && !mod: e.preventDefault(); if (showMode) app.engine.movePlayhead(1); else moveSelection(1); break;
@@ -474,7 +499,8 @@ app.renderers.add(() => {
 
 renderToolbar();
 wire();
-boot().then(() => {
+// Resolves once start-up (audio, MIDI, settings) has finished; the self-test waits for it.
+window.__nqReady = boot().then(() => {
   log('NomadCue ready — every feature unlocked, free forever.');
   requestAnimationFrame(liveUpdate);
 });

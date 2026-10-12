@@ -148,14 +148,39 @@ export class Engine {
     return this.playheadId ? findCue(this.ws, this.playheadId)?.cue || null : null;
   }
 
+  // Cues the playhead steps through: top-level cues plus the children of "step" groups.
+  playheadStops(list = this.activeList()) {
+    const out = [];
+    const visit = (cues) => {
+      for (const c of cues) {
+        out.push(c);
+        if (c.type === 'group' && c.mode === 'step') visit(c.children);
+      }
+    };
+    if (list) visit(list.cues);
+    return out;
+  }
+
   movePlayhead(delta) {
-    const list = this.activeList();
-    if (!list || !list.cues.length) return;
-    // Only top-level cues of the active list are playhead stops.
-    let i = list.cues.findIndex((c) => c.id === this.playheadId);
-    if (i < 0) i = delta > 0 ? -1 : list.cues.length;
-    const next = list.cues[Math.max(0, Math.min(list.cues.length - 1, i + delta))];
-    this.setPlayhead(next.id);
+    const stops = this.playheadStops();
+    if (!stops.length) return;
+    let i = stops.findIndex((c) => c.id === this.playheadId);
+    if (i < 0) i = delta > 0 ? -1 : stops.length;
+    this.setPlayhead(stops[Math.max(0, Math.min(stops.length - 1, i + delta))].id);
+  }
+
+  // Where the playhead lands after GO on `cue`: the first cue after its auto-continue/auto-follow
+  // sequence, climbing out of groups once a group's children are used up.
+  nextAfterGo(cue) {
+    let id = cue.id;
+    for (;;) {
+      const f = findCue(this.ws, id);
+      if (!f) return null;
+      const after = cueAfterSequence(f.parent ? f.parent.children : f.list.cues, id);
+      if (after) return after;
+      if (!f.parent) return null;
+      id = f.parent.id;
+    }
   }
 
   runsFor(cueId) {
@@ -172,11 +197,11 @@ export class Engine {
     const now = this.clock.now();
     if (now - this.lastGo < this.minGoInterval * 1000) return false; // double-GO protection
     this.lastGo = now;
-    const cue = this.playheadCue();
+    let cue = this.playheadCue();
     if (!cue) return false;
-    const sibs = siblingsOf(this.ws, cue.id) || [];
-    const after = cueAfterSequence(sibs, cue.id);
-    this.playheadId = after ? after.id : null;
+    // "step" groups: GO enters the group and fires its first child; later GOs step through the rest.
+    while (cue.type === 'group' && cue.mode === 'step' && cue.children.length) cue = cue.children[0];
+    this.playheadId = this.nextAfterGo(cue)?.id ?? null;
     this.trigger(cue);
     this.emit();
     return true;

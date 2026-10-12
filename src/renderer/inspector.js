@@ -1,7 +1,7 @@
 // Inspector: edits the selected cue(s). Multi-selection edits shared fields on every selected cue.
 import { app, render, snapshot, markDirty, selectedCues, checkMedia, fireCue, change } from './app.js';
 import {
-  CUE_TYPES, CUE_COLORS, BLEND_MODES, FADE_CURVES, GROUP_MODES, MSC_COMMANDS, walk, cueSummary, findCue,
+  CUE_TYPES, CUE_COLORS, neverEnds, neverEndsReason, BLEND_MODES, FADE_CURVES, GROUP_MODES, MSC_COMMANDS, walk, cueSummary, findCue,
 } from './lib/model.js';
 import { h, clear } from './lib/dom.js';
 import { formatTime, parseTime } from './lib/util.js';
@@ -458,9 +458,9 @@ function midiTab(cues, one) {
 }
 
 const TRANSITIONS = [
-  { value: 'none', icon: '■', title: 'Wait for GO', desc: 'Stop here. The next cue waits until you press GO.' },
-  { value: 'auto-continue', icon: '↓', title: 'Auto-continue', desc: 'Start the next cue after the post-wait, counted from when this cue starts.' },
-  { value: 'auto-follow', icon: '⇣', title: 'Auto-follow', desc: 'Start the next cue as soon as this cue finishes.' },
+  { value: 'none', icon: '■', title: 'Wait for GO', desc: 'Stop here. The next cue waits until you press GO (Space).' },
+  { value: 'auto-continue', icon: '↓', title: 'Start next with this', desc: 'Auto-continue: the next cue starts after the post-wait, counted from when this cue starts (0 = together).' },
+  { value: 'auto-follow', icon: '⇣', title: 'Start next when done', desc: 'Auto-follow: the next cue starts when this cue finishes.' },
 ];
 
 function nextCueOf(cue) {
@@ -478,6 +478,8 @@ function timelineSentence(cue) {
   const next = nextCueOf(cue);
   if (cue.continueMode === 'auto-continue') {
     parts.push(next ? `${cue.postWait > 0 ? formatTime(cue.postWait) + ' after it starts' : 'At the same moment'}, ${name(next)} starts automatically.` : 'There is no next cue to continue to.');
+  } else if (cue.continueMode === 'auto-follow' && neverEnds(cue)) {
+    parts.push(next ? `It never finishes on its own, so ${name(next)} will not start automatically. GO moves the playhead to it instead.` : 'It never finishes on its own.');
   } else if (cue.continueMode === 'auto-follow') {
     parts.push(next ? `When it finishes, ${name(next)} starts automatically.` : 'There is no next cue to follow.');
   } else {
@@ -495,7 +497,7 @@ function timelineBar(cue) {
     h('div', { class: 'tl-go' }, 'GO'),
     pre > 0 ? seg('tl-pre', pre / total, `pre-wait ${formatTime(pre)}`) : null,
     seg('tl-action', Math.max(post, 2) / total, 'this cue ' + (cue.continueMode === 'auto-continue' ? `· next in ${formatTime(post)}` : '')),
-    h('div', { class: `tl-next m-${cue.continueMode}` }, cue.continueMode === 'none' ? '■ wait for GO' : cue.continueMode === 'auto-follow' ? '⇣ next when done' : '↓ next'));
+    h('div', { class: `tl-next m-${cue.continueMode}` }, cue.continueMode === 'none' ? '■ wait for GO' : cue.continueMode === 'auto-follow' ? '⇣ next when done' : '↓ next starts'));
 }
 
 function basicsTab(cues) {
@@ -516,6 +518,9 @@ function basicsTab(cues) {
           });
           return el;
         })())),
+      cues.some((c) => c.continueMode === 'auto-follow' && neverEnds(c))
+        ? h('div', { class: 'warn-box' }, `⚠ “Start next when done” will never fire: ${neverEndsReason(cues.find((c) => c.continueMode === 'auto-follow' && neverEnds(c)))}. Give it a duration, or choose “Start next with this” (with a post-wait) instead.`)
+        : null,
       one ? timelineBar(one) : null,
       one ? h('p', { class: 'sentence' }, timelineSentence(one)) : null),
     row(field('Color', h('div', { class: 'colors' }, CUE_COLORS.map((c) => h('button', {

@@ -131,9 +131,9 @@ export function select(id, { add = false, range = false } = {}) {
     if (id) app.selection.add(id);
     app.lastSelected = id;
   }
-  // Playhead follows selection of top-level cues in the active list.
+  // Playhead follows the selected cue (including cues inside groups) in the active list.
   const f = id && findCue(app.ws, id);
-  if (f && !f.parent && f.list.id === app.engine.activeList()?.id && f.list.kind !== 'cart' && !app.ws.settings.general.showMode) {
+  if (f && f.list.id === app.engine.activeList()?.id && f.list.kind !== 'cart' && !app.ws.settings.general.showMode) {
     app.engine.setPlayhead(id);
   }
   render();
@@ -603,6 +603,10 @@ export async function applySettings() {
 
 export function go() {
   app.audio.resume();
+  if (!app.engine.playheadCue()) {
+    toast('End of the list — click a cue (or press ↑) to choose what GO plays next');
+    return false;
+  }
   return app.engine.go();
 }
 

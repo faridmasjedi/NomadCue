@@ -8,11 +8,18 @@ import { createWorkspace, createCue } from './lib/model.js';
 import { uid } from './lib/util.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// Polls until fn() is true (or the timeout passes); avoids flaky fixed sleeps on slow machines / CI.
+async function waitFor(fn, ms = 3000) {
+  const end = performance.now() + ms;
+  while (performance.now() < end) { if (fn()) return true; await sleep(20); }
+  return fn();
+}
 
 export async function runSelfTest() {
   const passed = [];
   const failed = [];
   const check = (name, cond, detail = '') => (cond ? passed : failed).push(cond ? name : `${name} ${detail}`);
+  await window.__nqReady; // don't race app start-up (it reloads the workspace when done)
 
   const ws = createWorkspace();
   ws.settings.osc.port = 53999;
@@ -81,29 +88,25 @@ export async function runSelfTest() {
     app.audio.buffers.set('/__selftest_long__.wav', Promise.resolve(mk(1)));
     check('audio context running', ctx.state === 'running', ctx.state);
     app.engine.trigger(c8);
-    await sleep(100);
     const run8 = app.engine.runsFor(c8.id)[0];
-    check('audio cue running', !!run8 && Math.abs((run8.duration() || 0) - 0.3) < 0.01, `dur=${run8?.duration()}`);
-    await sleep(500);
-    check('audio cue ended naturally', !app.engine.isRunning(c8.id));
+    await waitFor(() => run8?.duration() != null, 1000);
+    check('audio cue running', !!run8 && Math.abs((run8.duration() || 0) - 0.3) < 0.01, `dur=${run8?.duration()} log=${app.logLines.slice(-2).join(' / ')}`);
+    check('audio cue ended naturally', await waitFor(() => !app.engine.isRunning(c8.id), 3000));
 
     // 8. looping audio + fade cue with stop-target
     app.engine.trigger(c9);
     await sleep(100);
-    check('looping audio running', app.engine.isRunning(c9.id));
+    check('looping audio running', app.engine.isRunning(c9.id), `runs=${[...app.engine.runs.values()].map((r) => r.cue.number)} log=${app.logLines.slice(-3).join(' / ')}`);
     app.engine.trigger(c10);
-    await sleep(600);
-    check('fade cue stopped its target', !app.engine.isRunning(c9.id));
+    check('fade cue stopped its target', await waitFor(() => !app.engine.isRunning(c9.id), 3000));
 
     // 9. pause / resume
     app.engine.trigger(c8);
-    await sleep(80);
-    app.engine.pauseAll();
+    app.engine.pauseAll(); // pause immediately, even before the audio has loaded
     await sleep(400);
     check('paused audio stays alive', app.engine.isRunning(c8.id));
     app.engine.resumeAll();
-    await sleep(450);
-    check('resumed audio finishes', !app.engine.isRunning(c8.id));
+    check('resumed audio finishes', await waitFor(() => !app.engine.isRunning(c8.id), 3000));
 
     // 10. real media files through media:// (dev checkout only)
     const fixtures = decodeURIComponent(new URL('../../test/fixtures/', location.href).pathname);
@@ -185,7 +188,47 @@ export async function runSelfTest() {
     await sleep(20);
     check('context menu closes on Esc', !document.querySelector('.cm'));
 
-    // 14. undo
+    // 14. the user's scenario: Group[ Text (until stopped, auto-follow) , Light ] + Space key handling
+    app.engine.hardStop();
+    const txt2 = createCue('text', { number: 'T', text: 'Salam', duration: 0, continueMode: 'auto-follow', stage: 'stage1' });
+    const lt = createCue('light', { number: 'L', commands: 'front = 40', duration: 0 });
+    const grp = createCue('group', { number: 'GRP', mode: 'step', children: [txt2, lt] });
+    list.cues.push(grp);
+    select(grp.id);
+    await sleep(50);
+    check('warning shown for follow that never fires', !!document.querySelector(`.row[data-id="${txt2.id}"] .c-cont.stuck`));
+    select(lt.id);
+    check('clicking a cue inside a group moves the playhead to it', app.engine.playheadId === lt.id);
+    select(grp.id);
+    const space = () => document.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
+    const sel = document.createElement('select');
+    sel.appendChild(document.createElement('option'));
+    document.body.appendChild(sel);
+    sel.focus();
+    space();
+    await sleep(50);
+    check('Space works while a dropdown has focus (step group fires first child)', app.engine.isRunning(txt2.id) && app.engine.playheadId === lt.id, `focus=${document.activeElement?.tagName} ph=${app.engine.playheadCue()?.number}`);
+    sel.remove();
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    document.body.appendChild(cb);
+    cb.focus();
+    app.engine.lastGo = -Infinity;
+    space();
+    cb.remove();
+    await sleep(50);
+    check('next Space steps to the next cue in the group', Math.round(app.lights.values['L1.intensity']) === 40);
+    const ta = document.createElement('textarea');
+    document.body.appendChild(ta);
+    ta.focus();
+    const ph = app.engine.playheadId;
+    app.engine.lastGo = -Infinity;
+    space();
+    check('Space while typing in a text field does not GO', app.engine.playheadId === ph);
+    ta.remove();
+    app.engine.hardStop();
+
+    // 15. undo
     const n = ws.lists[0].cues.length;
     change(() => { ws.lists[0].cues.push(createCue('memo', { number: uid() })); });
     check('change adds cue', app.ws.lists[0].cues.length === n + 1);
@@ -238,7 +281,16 @@ export function buildDemo() {
 }
 
 export async function showDemo(mode) {
+  await window.__nqReady;
   const ws = buildDemo();
+  if (mode === 'scenario') {
+    const t = createCue('text', { number: '2', text: 'Salam', duration: 0, continueMode: 'auto-follow' });
+    ws.lists[0].cues = [createCue('group', { number: '1', name: 'Group', mode: 'step', children: [t, createCue('light', { number: '3', commands: 'front = 50' })] })];
+    loadWorkspace(ws, null);
+    await sleep(300);
+    select(t.id);
+    return true;
+  }
   loadWorkspace(ws, null);
   await sleep(300);
   select(ws.lists[0].cues[1].id);
