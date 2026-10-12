@@ -435,7 +435,7 @@ app.renderers.add(() => {
 renderToolbar();
 wire();
 boot().then(() => {
-  log('NomadQlab ready — every feature unlocked, free forever.');
+  log('NomadCue ready — every feature unlocked, free forever.');
   requestAnimationFrame(liveUpdate);
 });
 

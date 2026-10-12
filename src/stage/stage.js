@@ -172,7 +172,7 @@ function identify(on) {
 }
 
 function applyConfig() {
-  document.title = `NomadQlab Stage — ${config.name || config.id}`;
+  document.title = `NomadCue Stage — ${config.name || config.id}`;
   document.body.style.background = config.background || '#000';
   const w = window.innerWidth;
   const h = window.innerHeight;

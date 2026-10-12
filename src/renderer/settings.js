@@ -40,9 +40,9 @@ function generalTab(s) {
     row(f('Panic fade time (s)', bind(s.general, 'panicTime', { type: 'number', min: 0, step: 0.1, apply: false })),
       f('Double-GO protection (s)', bind(s.general, 'minGoInterval', { type: 'number', min: 0, step: 0.05 }), 'Ignores GO presses closer together than this'),
       f('Autosave backup every (min, 0 = off)', bind(s.general, 'autosaveMinutes', { type: 'number', min: 0, step: 1, apply: false }))),
-    check(s.general, 'backups', 'Keep timestamped backups in "NomadQlab Backups" next to the workspace on every save', { apply: false }),
+    check(s.general, 'backups', 'Keep timestamped backups in "NomadCue Backups" next to the workspace on every save', { apply: false }),
     check(s.general, 'showMode', 'Show mode (locks editing; ↑/↓ move the playhead)', { apply: false }),
-    h('p', { class: 'muted' }, 'NomadQlab is free and open source. Every feature — unlimited outputs, stages, DMX, cue lists, carts, effects, OSC/MIDI, remote — is unlocked.'));
+    h('p', { class: 'muted' }, 'NomadCue is free and open source. Every feature — unlimited outputs, stages, DMX, cue lists, carts, effects, OSC/MIDI, remote — is unlocked.'));
 }
 
 function audioTab(s) {
@@ -177,7 +177,7 @@ function networkTab(s) {
       f('Plain-text UDP port', bind(s.osc, 'textPort', { type: 'number', min: 0, max: 65535 })),
       f('Reply port', bind(s.osc, 'replyPort', { type: 'number', min: 1, max: 65535, apply: false })),
       f('Passcode (optional)', bind(s.osc, 'passcode', { apply: false }), 'Clients send /connect <passcode> first')),
-    h('h3', {}, 'Supported OSC (QLab-style)'),
+    h('h3', {}, 'Supported OSC commands'),
     h('pre', { class: 'mono small' }, [
       '/go                    /go/{number}             /stop   /hardStop   /panic   /panicInTime {s}',
       '/pause   /resume       /reset                   /playhead/next   /playhead/previous   /playhead/{number}',

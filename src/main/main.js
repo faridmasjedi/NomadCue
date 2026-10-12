@@ -1,4 +1,4 @@
-// NomadQlab — Electron main process.
+// NomadCue — Electron main process.
 const { app, BrowserWindow, ipcMain, dialog, Menu, protocol, screen, shell, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -64,7 +64,7 @@ function sendControl(channel, payload) {
 function createControlWindow() {
   controlWin = new BrowserWindow({
     width: 1440, height: 900, minWidth: 980, minHeight: 600,
-    title: 'NomadQlab', backgroundColor: '#15171c', show: !SMOKE,
+    title: 'NomadCue', backgroundColor: '#15171c', show: !SMOKE,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true, nodeIntegration: false, sandbox: false,
@@ -122,7 +122,7 @@ function openStage(config) {
     const win = new BrowserWindow({
       x: display.bounds.x + 40, y: display.bounds.y + 40,
       width: config.width || 960, height: config.height || 540,
-      title: `NomadQlab Stage — ${config.name || config.id}`,
+      title: `NomadCue Stage — ${config.name || config.id}`,
       backgroundColor: '#000000', frame: !config.fullscreen, show: !SMOKE,
       webPreferences: {
         preload: path.join(__dirname, 'stage-preload.js'),
@@ -199,7 +199,7 @@ function startOscServer(port, textPort) {
 // ---------------------------------------------------------------- workspace files
 
 function backupDir(wsPath) {
-  return path.join(path.dirname(wsPath), 'NomadQlab Backups');
+  return path.join(path.dirname(wsPath), 'NomadCue Backups');
 }
 
 function writeBackup(wsPath, data, keep = 20) {
@@ -207,7 +207,7 @@ function writeBackup(wsPath, data, keep = 20) {
   fs.mkdirSync(dir, { recursive: true });
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   const base = path.basename(wsPath, path.extname(wsPath));
-  fs.writeFileSync(path.join(dir, `${base} ${stamp}.nomadqlab`), data);
+  fs.writeFileSync(path.join(dir, `${base} ${stamp}.nomadcue`), data);
   const files = fs.readdirSync(dir).filter((f) => f.startsWith(base + ' ')).sort();
   while (files.length > keep) fs.unlinkSync(path.join(dir, files.shift()));
 }
@@ -224,7 +224,7 @@ function openWorkspacePath(p) {
 
 async function chooseAndOpen() {
   const r = await dialog.showOpenDialog(controlWin, {
-    properties: ['openFile'], filters: [{ name: 'NomadQlab Workspace', extensions: ['nomadqlab', 'json'] }],
+    properties: ['openFile'], filters: [{ name: 'NomadCue Workspace', extensions: ['nomadcue', 'json'] }],
   });
   if (!r.canceled && r.filePaths[0]) openWorkspacePath(r.filePaths[0]);
 }
@@ -287,7 +287,7 @@ function registerIpc() {
     let target = p;
     if (!target || saveAs) {
       const r = await dialog.showSaveDialog(controlWin, {
-        defaultPath: target || 'Untitled.nomadqlab', filters: [{ name: 'NomadQlab Workspace', extensions: ['nomadqlab'] }],
+        defaultPath: target || 'Untitled.nomadcue', filters: [{ name: 'NomadCue Workspace', extensions: ['nomadcue'] }],
       });
       if (r.canceled) return null;
       target = r.filePath;
@@ -382,7 +382,7 @@ function buildMenu() {
         { role: 'minimize' }, { role: 'togglefullscreen' }, { role: 'toggleDevTools' },
       ],
     },
-    { role: 'help', submenu: [{ label: 'NomadQlab on GitHub', click: () => shell.openExternal('https://github.com/faridmasjedi/NomadQlab') }] },
+    { role: 'help', submenu: [{ label: 'NomadCue on GitHub', click: () => shell.openExternal('https://github.com/faridmasjedi/NomadCue') }] },
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
@@ -394,7 +394,7 @@ app.on('open-file', (e, p) => {
   if (controlWin && !controlWin.webContents.isLoading()) openWorkspacePath(p); else pendingOpenPath = p;
 });
 
-const argPath = process.argv.slice(1).find((a) => a.endsWith('.nomadqlab'));
+const argPath = process.argv.slice(1).find((a) => a.endsWith('.nomadcue'));
 if (argPath) pendingOpenPath = path.resolve(argPath);
 
 app.whenReady().then(() => {

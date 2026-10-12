@@ -71,7 +71,7 @@ class DmxOutput {
       const s = ((this.seq.get(universe) || 0) % 255) + 1;
       this.seq.set(universe, s);
       if (this.config.protocol === 'sacn') {
-        const pkt = sacnPacket(universe, data, s, this.cid, 'NomadQlab');
+        const pkt = sacnPacket(universe, data, s, this.cid, 'NomadCue');
         const host = this.config.host && this.config.host !== '255.255.255.255'
           ? this.config.host
           : `239.255.${(universe >> 8) & 0xff}.${universe & 0xff}`;
