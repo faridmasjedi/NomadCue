@@ -9,6 +9,7 @@
   "scripts": {
     "start": "electron .",
     "smoke": "NQ_SMOKE=1 electron .",
+    "docs:gifs": "electron scripts/docs-gifs/record.js",
     "test": "node --test test/*.test.mjs",
     "dist": "electron-builder",
     "dist:mac": "electron-builder --mac",

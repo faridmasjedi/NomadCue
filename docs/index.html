@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NomadCue — free show control</title>
+  <meta name="description" content="Free, open-source show control for theatre, live events and installations. Audio, video, lighting, OSC, MIDI, timecode, scripting and a phone remote, on macOS, Windows and Linux.">
+  <meta property="og:title" content="NomadCue — free show control">
+  <meta property="og:description" content="Build a list of cues, press GO, and NomadCue runs your show. Free and open source, every feature included.">
+  <meta property="og:image" content="assets/gifs/go.gif">
+  <link rel="icon" href="assets/icon.png">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./"><img src="assets/icon.png" alt=""><span>NomadCue</span></a>
+    <nav>
+      <a href="#download">Download</a>
+      <a href="guide.html">Guide</a>
+      <a href="https://github.com/faridmasjedi/NomadCue">GitHub</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <img class="logo" src="assets/icon.png" alt="NomadCue icon">
+    <h1>Run your whole show from one GO button</h1>
+    <p class="lead">NomadCue is free, open-source show control for theatre, live events and installations. Sound, projection, lights and network commands, all timed and linked together.</p>
+    <div class="cta">
+      <a class="btn go" id="heroDownload" href="#download">Download for free</a>
+      <a class="btn" href="guide.html">Read the guide</a>
+    </div>
+    <div class="meta">macOS (Apple Silicon &amp; Intel) · Windows · Linux · MIT licence · no accounts, tiers or limits</div>
+  </section>
+
+  <div class="showcase">
+    <img src="assets/gifs/go.gif" alt="Pressing Space to GO: cues start, the playhead moves down the list and running cues appear in the Active Cues panel" width="1280" height="757">
+  </div>
+
+  <section class="section">
+    <h2>Everything is included</h2>
+    <p class="sub">There's no paid tier. Every feature below works in the download, as many times and on as many outputs as your hardware allows.</p>
+    <div class="grid">
+      <a class="card" href="guide.html#audio"><h3><span class="ico">♪</span>Audio</h3><p>Unlimited outputs, per-cue crosspoint routing, fades with 5 curves, loops, EQ, compressor, delay and reverb.</p></a>
+      <a class="card" href="guide.html#video"><h3><span class="ico">▶</span>Video &amp; projection</h3><p>Unlimited stages on any display, layering, 16 blend modes, cropping, corner-pin keystone and edge blending.</p></a>
+      <a class="card" href="guide.html#lighting"><h3><span class="ico">☀</span>Lighting</h3><p>DMX over Art-Net and sACN, a text command language, groups, RGB(W) and moving-head instruments.</p></a>
+      <a class="card" href="guide.html#transitions"><h3><span class="ico">↓</span>Linked cues</h3><p>Wait for GO, start next with this, or start next when done. Pre-waits, post-waits and groups.</p></a>
+      <a class="card" href="guide.html#osc"><h3><span class="ico">⇄</span>OSC &amp; UDP</h3><p>Control NomadCue from consoles and other software, and send OSC or plain UDP from any cue.</p></a>
+      <a class="card" href="guide.html#midi"><h3><span class="ico">♫</span>MIDI, MSC &amp; timecode</h3><p>MIDI triggers with MIDI Learn, MIDI Show Control in and out, MIDI files and MIDI timecode.</p></a>
+      <a class="card" href="guide.html#remote"><h3><span class="ico">📱</span>Phone remote</h3><p>Open a web page on any phone, tablet or laptop to press GO, panic and fire cues.</p></a>
+      <a class="card" href="guide.html#scripts"><h3><span class="ico">{}</span>Scripting</h3><p>JavaScript script cues with a simple API for cues, lights, OSC, UDP and MIDI.</p></a>
+    </div>
+  </section>
+
+  <section class="section" id="download">
+    <h2>Download</h2>
+    <p class="sub">Pick your system. The highlighted one matches the computer you're on now.</p>
+    <div class="downloads">
+      <div class="dl" data-os="mac">
+        <h3>macOS</h3>
+        <div class="files">
+          <a data-asset="mac-arm64.dmg" href="https://github.com/faridmasjedi/NomadCue/releases/latest">Apple Silicon (M1 and later) <span>.dmg</span></a>
+          <a data-asset="mac-x64.dmg" href="https://github.com/faridmasjedi/NomadCue/releases/latest">Intel <span>.dmg</span></a>
+        </div>
+        <p class="note">Not sure which Mac you have? Apple menu → <b>About This Mac</b>: "Chip: Apple M…" means Apple Silicon, "Processor: Intel" means Intel.</p>
+      </div>
+      <div class="dl" data-os="windows">
+        <h3>Windows</h3>
+        <div class="files">
+          <a data-asset="win-x64.exe" href="https://github.com/faridmasjedi/NomadCue/releases/latest">Installer (64-bit) <span>.exe</span></a>
+          <a data-asset="portable.exe" href="https://github.com/faridmasjedi/NomadCue/releases/latest">Portable, no install <span>.exe</span></a>
+        </div>
+        <p class="note">Windows 10 or 11. The portable version runs from a USB stick.</p>
+      </div>
+      <div class="dl" data-os="linux">
+        <h3>Linux</h3>
+        <div class="files">
+          <a data-asset="x86_64.AppImage" href="https://github.com/faridmasjedi/NomadCue/releases/latest">AppImage (any distro) <span>.AppImage</span></a>
+          <a data-asset="amd64.deb" href="https://github.com/faridmasjedi/NomadCue/releases/latest">Debian / Ubuntu <span>.deb</span></a>
+        </div>
+        <p class="note">64-bit x86. Make the AppImage executable before running it.</p>
+      </div>
+    </div>
+    <p class="release-line" id="releaseLine">All downloads are on the <a href="https://github.com/faridmasjedi/NomadCue/releases/latest">GitHub releases page</a>.</p>
+  </section>
+
+  <section class="section">
+    <h2>First launch</h2>
+    <p class="sub">The builds aren't code-signed yet, so your system will ask you to confirm the first time you open NomadCue.</p>
+    <div class="steps">
+      <div class="card"><h3>macOS</h3><p>Open the <code>.dmg</code> and drag NomadCue to Applications. The first time, <b>right-click</b> the app, choose <b>Open</b>, then <b>Open</b> again. After that it opens normally.</p></div>
+      <div class="card"><h3>Windows</h3><p>Run the installer. If SmartScreen says "Windows protected your PC", click <b>More info</b>, then <b>Run anyway</b>.</p></div>
+      <div class="card"><h3>Linux</h3><p>AppImage: <code>chmod +x NomadCue-*.AppImage</code> and run it. Debian/Ubuntu: <code>sudo apt install ./NomadCue-*.deb</code>.</p></div>
+      <div class="card"><h3>Build your first show</h3><p>Drag sound or video files onto the window, then press <kbd>Space</kbd>. The <a href="guide.html#quick-start">quick start</a> walks you through it.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Learn it in an evening</h2>
+    <p class="sub">The guide has a page for every feature, each with a short recording of the real app.</p>
+    <div class="grid">
+      <a class="card" href="guide.html#quick-start"><h3><span class="ico">🚀</span>Quick start</h3><p>From an empty workspace to a running show in five minutes.</p></a>
+      <a class="card" href="guide.html#transitions"><h3><span class="ico">↓</span>Transitions</h3><p>Make cues start together, one after another, or wait for you.</p></a>
+      <a class="card" href="guide.html#video"><h3><span class="ico">▶</span>Video &amp; stages</h3><p>Put video, images and text on any screen or projector.</p></a>
+      <a class="card" href="guide.html#shortcuts"><h3><span class="ico">⌨</span>Keyboard shortcuts</h3><p>Every key, on one page.</p></a>
+    </div>
+  </section>
+
+  <footer>
+    <span>NomadCue is free and open source under the MIT licence.</span>
+    <span><a href="https://github.com/faridmasjedi/NomadCue">Source code</a> · <a href="https://github.com/faridmasjedi/NomadCue/issues">Report a problem</a> · <a href="guide.html">Guide</a></span>
+  </footer>
+
+  <script src="assets/download.js"></script>
+</body>
+</html>

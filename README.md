@@ -5,6 +5,8 @@
 **Free, open-source, cross-platform show control for theatre, live events and installations.**
 Audio, video, lighting, OSC, MIDI, timecode, scripting and a phone remote. Every feature is included, with no licences, tiers or limits.
 
+**Website, downloads and full guide: https://faridmasjedi.github.io/NomadCue/**
+
 Build a list of cues, press **GO**, and NomadCue runs your show: sound, projection, lights and network commands, all timed and linked together. It runs on **macOS, Windows and Linux**.
 
 ---
@@ -143,7 +145,10 @@ You can also push a tag yourself: `git tag v1.0.0 && git push origin v1.0.0`.
 ```bash
 npm test        # unit tests: engine, OSC, DMX packets, lighting language, MIDI files, model
 npm run smoke   # launches the real app headless and runs a 39-step end-to-end self-test
+npm run docs:gifs   # re-records the website's GIFs from the real app (needs ffmpeg); add scene names to record only some
 ```
+
+The website lives in `docs/` and is published to GitHub Pages by `.github/workflows/pages.yml` when it changes on `main`.
 
 Project layout:
 ```

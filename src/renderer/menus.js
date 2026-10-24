@@ -177,7 +177,8 @@ export function openListMenu(e) {
 export function openTransitionMenu(e, cue) {
   e.preventDefault();
   e.stopPropagation();
-  if (!app.selection.has(cue.id)) select(cue.id);
+  // Measure before selecting: selecting re-renders the list and detaches the clicked cell.
   const r = e.currentTarget.getBoundingClientRect();
+  if (!app.selection.has(cue.id)) select(cue.id);
   showMenu(r.left, r.bottom, transitionMenu(selectedCues().map((c) => c.id), cue));
 }
