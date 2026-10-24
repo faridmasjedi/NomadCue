@@ -95,7 +95,10 @@ body.show-mode #inspector { height: 120px; pointer-events: none; opacity: .6; }
 /* ---------------- cue rows */
 .row { display: grid; grid-template-columns: 22px 20px 30px 70px minmax(160px, 1fr) 150px 82px 82px 82px 104px; align-items: center; height: 30px; padding-right: 8px; border-bottom: 1px solid #1f232b; position: relative; cursor: default; }
 .row > div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 4px; }
-.row.header { position: sticky; top: 0; z-index: 2; height: 24px; background: var(--bg2); color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--line); }
+.row.header { position: sticky; top: 0; z-index: 2; height: 24px; background: var(--bg2); color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--line); border-left: 4px solid transparent; }
+/* Header labels line up with their values: times right-aligned, Then centred. */
+.row.header > div:nth-child(n+7):nth-child(-n+9) { text-align: right; }
+.row.header > div:nth-child(10) { text-align: center; }
 .rows .row:nth-child(even) { background: rgba(255,255,255,.015); }
 .row.selected { background: rgba(61,139,253,.22) !important; }
 .row.playhead { box-shadow: inset 0 2px 0 var(--go), inset 0 -2px 0 var(--go); }

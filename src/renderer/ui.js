@@ -140,7 +140,13 @@ function cueRow(cue, depth) {
     class: ['row', `c-${cue.color}`, app.selection.has(cue.id) && 'selected', isPH && 'playhead', status, isBroken(cue) && 'broken',
       !cue.armed && 'disarmed', cue.type === 'group' && 'group', cue.flagged && 'flagged'].filter(Boolean).join(' '),
     dataset: { id: cue.id }, draggable: true,
-    onMousedown: (e) => { if (e.button === 0 && !e.target.closest('input,button')) select(cue.id, { add: e.metaKey || e.ctrlKey, range: e.shiftKey }); },
+    onMousedown: (e) => {
+      if (e.button !== 0 || e.target.closest('input,button')) return;
+      const add = e.metaKey || e.ctrlKey, range = e.shiftKey;
+      // Re-selecting an already selected cue would re-render the row between the two clicks of a double-click and swallow it.
+      if (!add && !range && app.selection.size === 1 && app.selection.has(cue.id) && app.engine.playheadId === cue.id) return;
+      select(cue.id, { add, range });
+    },
     onDblclick: (e) => {
       if (e.target.closest('.c-pre')) return editTime(row.querySelector('.c-pre'), cue, 'preWait');
       if (e.target.closest('.c-post')) return editTime(row.querySelector('.c-post'), cue, 'postWait');

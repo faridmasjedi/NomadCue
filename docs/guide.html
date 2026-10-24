@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NomadCue Guide</title>
+  <meta name="description" content="The complete NomadCue guide: every feature, step by step, with recordings of the real app.">
+  <link rel="icon" href="assets/icon.png">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./"><img src="assets/icon.png" alt=""><span>NomadCue</span></a>
+    <nav>
+      <a href="./#download">Download</a>
+      <a href="guide.html" class="on">Guide</a>
+      <a href="https://github.com/faridmasjedi/NomadCue">GitHub</a>
+    </nav>
+  </header>
+
+  <div class="guide">
+    <aside class="side">
+      <input id="search" type="search" placeholder="Search the guide…" aria-label="Search the guide">
+      <div class="none">No matches.</div>
+
+      <h4>Getting started</h4>
+      <a href="#quick-start"><span class="ico">🚀</span>Quick start</a>
+      <a href="#interface"><span class="ico">🖥</span>The main window</a>
+      <a href="#adding-cues"><span class="ico">＋</span>Adding cues</a>
+
+      <h4>Running a show</h4>
+      <a href="#go"><span class="ico">▶</span>GO and the playhead</a>
+      <a href="#panic"><span class="ico">■</span>Panic, pause and reset</a>
+      <a href="#show-mode"><span class="ico">🔒</span>Show Mode and safety</a>
+      <a href="#carts"><span class="ico">▦</span>Carts (sound pads)</a>
+      <a href="#remote"><span class="ico">📱</span>Phone remote</a>
+
+      <h4>Building the cue list</h4>
+      <a href="#context-menu"><span class="ico">☰</span>The right-click menu</a>
+      <a href="#transitions"><span class="ico">↓</span>Transitions</a>
+      <a href="#waits"><span class="ico">⏱</span>Pre-wait and post-wait</a>
+      <a href="#fades"><span class="ico">◢</span>Fades and crossfades</a>
+      <a href="#groups"><span class="ico">⧉</span>Groups</a>
+      <a href="#cue-types"><span class="ico">📋</span>All 25 cue types</a>
+
+      <h4>Media</h4>
+      <a href="#audio"><span class="ico">♪</span>Audio and mic cues</a>
+      <a href="#video"><span class="ico">▶</span>Video, images and text</a>
+      <a href="#stages"><span class="ico">🎦</span>Stages and projection</a>
+
+      <h4>Lighting</h4>
+      <a href="#lighting"><span class="ico">☀</span>Lighting</a>
+
+      <h4>Control and automation</h4>
+      <a href="#osc"><span class="ico">⇄</span>OSC and UDP</a>
+      <a href="#midi"><span class="ico">♫</span>MIDI, MSC and timecode</a>
+      <a href="#scripts"><span class="ico">{}</span>Script cues</a>
+
+      <h4>Setup and files</h4>
+      <a href="#settings"><span class="ico">⚙</span>Workspace settings</a>
+      <a href="#files"><span class="ico">💾</span>Saving, backups and moving shows</a>
+
+      <h4>Reference</h4>
+      <a href="#shortcuts"><span class="ico">⌨</span>Keyboard shortcuts</a>
+      <a href="#troubleshooting"><span class="ico">?</span>Troubleshooting</a>
+    </aside>
+
+    <main class="content">
+      <button class="btn menu-toggle" type="button">☰ All topics</button>
+
+      <!-- ============================================================ GETTING STARTED -->
+
+      <section class="tab" id="quick-start">
+        <div class="crumb">Getting started</div>
+        <h1>Quick start</h1>
+        <p class="intro">From an empty workspace to a running show in five minutes. You'll add some sound, a light change and a video, link them, and run them with GO.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/add-cues.gif" alt="Dragging two sound files onto the cue list creates two audio cues; then the Light toolbar button adds a light cue and its commands are typed in" width="1280" height="757">
+          <figcaption>Drop files to create cues, then add a light cue from the toolbar.</figcaption>
+        </figure>
+
+        <h2>1. Install and open NomadCue</h2>
+        <p>Download the installer for your system from the <a href="./#download">download page</a> and open it. The first launch needs one extra confirmation because the builds aren't code-signed yet (see <a href="#troubleshooting">Troubleshooting</a>). NomadCue opens with an empty workspace called <b>Main Cue List</b>.</p>
+
+        <h2>2. Add some cues</h2>
+        <ol>
+          <li><b>Drag sound or video files</b> from Finder, Explorer or your file manager onto the window. Each file becomes a cue, in the order you dropped them.</li>
+          <li><b>Click a toolbar button</b> to add any other kind of cue. Try <b>Light</b> or <b>Memo</b>.</li>
+          <li>Every new cue gets the next number. Click its name in the list, or use the <b>Inspector</b> at the bottom, to rename it.</li>
+        </ol>
+
+        <h2>3. Decide what happens next</h2>
+        <p>By default every cue waits for you to press GO. To make cues fire together or one after another, click the <b>Then</b> column of a cue and pick:</p>
+        <ul>
+          <li><b>Wait for GO</b>: stop here until the next GO.</li>
+          <li><b>Start next with this</b>: the next cue starts at the same time (or after the post-wait).</li>
+          <li><b>Start next when done</b>: the next cue starts when this one finishes.</li>
+        </ul>
+        <p>The <a href="#transitions">Transitions</a> page explains these in detail.</p>
+
+        <h2>4. Run it</h2>
+        <p>Press <kbd>Space</kbd> or click the big green <b>GO</b> button. The cue under the playhead (the ▶ in the left column, also shown as <b>Standing by</b> at the top) starts, and the playhead moves to the next cue. Running cues appear under <b>Active Cues</b> on the left with their time remaining.</p>
+        <p>If anything goes wrong, press <kbd>Esc</kbd> to fade everything out. Press it twice to stop instantly.</p>
+
+        <h2>5. Save</h2>
+        <p>Press <kbd>⌘S</kbd> (<kbd>Ctrl+S</kbd> on Windows and Linux). Workspaces are saved as <code>.nomadcue</code> files. Every save also keeps a timestamped backup next to the file. See <a href="#files">Saving, backups and moving shows</a>.</p>
+
+        <div class="tip"><b>Tip:</b> In this guide, <kbd>⌘</kbd> means the Command key on a Mac. On Windows and Linux use <kbd>Ctrl</kbd> instead, and <kbd>⌥</kbd> (Option) is <kbd>Alt</kbd>.</div>
+      </section>
+
+      <section class="tab" id="interface">
+        <div class="crumb">Getting started</div>
+        <h1>The main window</h1>
+        <p class="intro">Everything you need while running a show is on one screen. Here's what each part does.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/go.gif" alt="The main window while a show runs: GO button and Standing by at the top, toolbar of cue types, cue lists and active cues on the left, the cue list in the middle" width="1280" height="757">
+          <figcaption>The main window during a show.</figcaption>
+        </figure>
+
+        <h2>Top bar</h2>
+        <div class="table-wrap"><table>
+          <tr><th>Control</th><th>What it does</th></tr>
+          <tr><td>GO</td><td>Starts the cue under the playhead and moves the playhead on. Same as <kbd>Space</kbd>. Greyed out at the end of the list.</td></tr>
+          <tr><td>Standing by</td><td>The number and name of the next cue GO will start, plus its notes in orange (useful for reminders like "wait for the house to open").</td></tr>
+          <tr><td>Pause</td><td>Pauses everything that's running, including waits. Click again to resume. Shortcut <kbd>P</kbd> pauses the selected cue.</td></tr>
+          <tr><td>Reset</td><td>Stops everything and returns the playhead to the top of the list.</td></tr>
+          <tr><td>Panic</td><td>Fades everything out. Click twice to stop instantly. Same as <kbd>Esc</kbd>.</td></tr>
+          <tr><td>Show Mode</td><td>Locks editing so nothing can be changed by accident during a performance. See <a href="#show-mode">Show Mode</a>.</td></tr>
+          <tr><td>☀</td><td>Opens the <a href="#lighting">Light Dashboard</a>.</td></tr>
+          <tr><td>📱</td><td>Shows whether the <a href="#remote">phone remote</a> is on. Hover it to see the address to open on your phone.</td></tr>
+          <tr><td>≡</td><td>Opens the log: every cue fired, OSC message received and error.</td></tr>
+          <tr><td>⚙</td><td>Opens <a href="#settings">Workspace Settings</a>.</td></tr>
+        </table></div>
+
+        <h2>Toolbar</h2>
+        <p>One button per cue type: Group, Audio, Mic, Video, Camera, Text, Light, Fade, Network, MIDI, MIDI File, Timecode, Start, Stop, Pause, Load, Reset, Devamp, GoTo, Target, Arm, Disarm, Wait, Memo and Script. Click one to add that cue after the selected cue. <a href="#cue-types">All 25 cue types</a> explains each one.</p>
+
+        <h2>Sidebar</h2>
+        <ul>
+          <li><b>Cue Lists &amp; Carts</b>: every list in the workspace with its number of cues. <b>+☰</b> adds a cue list and <b>+▦</b> adds a cart. Double-click a name to rename it.</li>
+          <li><b>Active Cues</b>: every running cue with a progress bar, elapsed and remaining time, and its own pause and stop buttons.</li>
+        </ul>
+
+        <h2>Cue list columns</h2>
+        <div class="table-wrap"><table>
+          <tr><th>Column</th><th>Meaning</th></tr>
+          <tr><td>▶</td><td>The playhead. Click in this column to move the playhead to that cue without selecting it.</td></tr>
+          <tr><td>Status</td><td><b>●</b> running, <b>❙❙</b> paused, <b>◌</b> waiting in a pre-wait, <b>⚠</b> broken (missing file or target).</td></tr>
+          <tr><td>Type</td><td>The cue type's icon.</td></tr>
+          <tr><td>Number</td><td>The cue number used by GO, OSC, MIDI and scripts. Numbers can contain dots and letters, like <code>4.1</code> or <code>S2</code>.</td></tr>
+          <tr><td>Name</td><td>The cue's name. Groups have a ▾ to fold them. ¶ means the cue has notes, and a key badge shows its hotkey.</td></tr>
+          <tr><td>Target</td><td>The file a media cue plays, or the cue a fade, stop or other control cue acts on.</td></tr>
+          <tr><td>Pre-wait</td><td>Delay before the cue starts. Double-click to edit.</td></tr>
+          <tr><td>Action</td><td>How long the cue runs. <b>∞</b> means until stopped (looping sound, held image, camera).</td></tr>
+          <tr><td>Post-wait</td><td>Delay before the next cue starts automatically. Double-click to edit.</td></tr>
+          <tr><td>Then</td><td>What happens after this cue: <b>GO</b> (wait for GO), <b>↓ with this</b> or <b>↓ when done</b>. Click to change.</td></tr>
+        </table></div>
+        <p>Cues joined by "with this" or "when done" are connected by a blue line on the left, so you can see sequences at a glance. A thin bar under a running cue shows its progress.</p>
+
+        <h2>Inspector</h2>
+        <p>The panel under the cue list edits the selected cue. Its tabs depend on the cue type. Every cue has <b>Basics</b> (number, name, timing and transition, colour, armed, flagged, notes) and <b>Triggers</b> (hotkey, MIDI trigger, re-trigger behaviour). Select several cues to edit them all at once; fields that differ show <i>(multiple)</i>.</p>
+
+        <h2>Status bar</h2>
+        <p>Along the bottom: number of cues and lists, audio outputs and sample rate, the OSC port, the latest log line, and small output meters. Click the meters to open the large <b>Audio Output Meters</b> window.</p>
+      </section>
+
+      <section class="tab" id="adding-cues">
+        <div class="crumb">Getting started</div>
+        <h1>Adding cues</h1>
+        <p class="intro">There are five ways to add a cue. New cues go after the selected cue, or at the end if nothing is selected.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/add-cues.gif" alt="Dropping thunder.wav and rain.wav onto the list creates two audio cues; clicking Light in the toolbar adds a light cue; typing commands into its Levels tab" width="1280" height="757">
+          <figcaption>Drop media files, or use the toolbar.</figcaption>
+        </figure>
+
+        <h2>1. Drag and drop files</h2>
+        <p>Drag files from your computer anywhere onto the window. The list shows <b>"Drop media to create cues"</b> while you're dragging.</p>
+        <div class="table-wrap"><table>
+          <tr><th>You drop</th><th>You get</th></tr>
+          <tr><td>Sound</td><td>An Audio cue. Supported: WAV, AIFF, MP3, FLAC, OGG, M4A, AAC, Opus.</td></tr>
+          <tr><td>Video or image</td><td>A Video cue. Supported: MP4, M4V, MOV, WebM, MKV, PNG, JPEG, GIF, WebP, SVG.</td></tr>
+          <tr><td>MIDI file</td><td>A MIDI File cue (<code>.mid</code>, <code>.midi</code>).</td></tr>
+          <tr><td>A <code>.nomadcue</code> file</td><td>Opens that workspace.</td></tr>
+        </table></div>
+        <p>Drop onto a specific cue to place the new cues before or after it, or onto the middle of a group to put them inside. Drop onto a cart to add pads.</p>
+
+        <h2>2. The toolbar</h2>
+        <p>Click any cue type in the toolbar. Audio, Video and MIDI File open a file picker so you can choose one or more files.</p>
+
+        <h2>3. Keyboard shortcuts</h2>
+        <p><kbd>⌘1</kbd> Audio · <kbd>⌘2</kbd> Mic · <kbd>⌘3</kbd> Video · <kbd>⌘4</kbd> Camera · <kbd>⌘5</kbd> Text · <kbd>⌘6</kbd> Light · <kbd>⌘7</kbd> Fade · <kbd>⌘8</kbd> Network · <kbd>⌘9</kbd> MIDI · <kbd>⌘0</kbd> Group.</p>
+
+        <h2>4. Right-click</h2>
+        <p>Right-click a cue and choose <b>Add cue after</b>, or right-click empty space in the list to add a cue at the end. Inside a group, choose <b>Add cue inside this group</b>.</p>
+
+        <h2>5. Inside a group</h2>
+        <p>Hover a group and click <b>+ add inside</b> to pick a cue type that goes straight into the group.</p>
+
+        <h2>After adding</h2>
+        <ul>
+          <li>Press <kbd>Enter</kbd> to rename the selected cue, or double-click its name or number.</li>
+          <li>Drag cues to reorder them. Drop on the top or bottom half of a row to go before or after it, or on the middle of a group to go inside.</li>
+          <li><kbd>⌘D</kbd> duplicates, <kbd>⌘C</kbd>/<kbd>⌘X</kbd>/<kbd>⌘V</kbd> copy, cut and paste, <kbd>⌥↑</kbd>/<kbd>⌥↓</kbd> move the cue up or down.</li>
+          <li><b>Edit → Renumber Selected Cues</b> renumbers a selection in order.</li>
+        </ul>
+        <div class="warn"><b>Missing files:</b> if a cue's file has been moved or deleted, the cue turns red with a ⚠. Select it and choose the file again in the Inspector, or use <a href="#files">Bundle Workspace</a> to keep media with the show.</div>
+      </section>
+
+      <!-- ============================================================ RUNNING A SHOW -->
+
+      <section class="tab" id="go">
+        <div class="crumb">Running a show</div>
+        <h1>GO and the playhead</h1>
+        <p class="intro">The playhead marks the next cue. GO starts it and moves the playhead on, so you can run a whole show by pressing one key.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/go.gif" alt="Pressing Space four times: preshow music starts, a fade and light change run together, then a group with video, thunder and lightning starts" width="1280" height="757">
+          <figcaption>Each <kbd>Space</kbd> starts the cue on standby. Linked cues start on their own.</figcaption>
+        </figure>
+
+        <h2>Pressing GO</h2>
+        <ul>
+          <li>Press <kbd>Space</kbd> or click <b>GO</b>.</li>
+          <li><kbd>Space</kbd> works even after you've clicked a button or dropdown. It only types a space while you're in a text field. Press <kbd>Esc</kbd> to leave a text field.</li>
+          <li>When the cue is linked to the next with <b>Start next with this</b> or <b>Start next when done</b>, the whole sequence runs and the playhead jumps past it to the next cue that waits for GO.</li>
+          <li>At the end of the list, <b>Standing by</b> shows <b>— end of list —</b> and GO is disabled.</li>
+        </ul>
+
+        <h2>Moving the playhead</h2>
+        <ul>
+          <li><b>Click a cue</b> (even one inside a group) to select it and put the playhead there.</li>
+          <li><b>Click the ▶ column</b> to move the playhead without changing the selection.</li>
+          <li><kbd>↑</kbd>/<kbd>↓</kbd> move the selection, and the playhead follows. In <a href="#show-mode">Show Mode</a> they move the playhead directly.</li>
+          <li>Right-click a cue and choose <b>Set playhead here</b>.</li>
+          <li>A <b>GoTo</b> cue moves the playhead when it runs, which is useful for jumping to a different scene.</li>
+        </ul>
+
+        <h2>Starting a cue without moving the playhead</h2>
+        <ul>
+          <li>Press <kbd>V</kbd> to audition the selected cue, or right-click it and choose <b>Play now</b>.</li>
+          <li>Give a cue a <b>hotkey</b> in its Triggers tab, or fire it from the phone remote, OSC or MIDI.</li>
+          <li><kbd>S</kbd> stops the selected cue and <kbd>P</kbd> pauses it.</li>
+        </ul>
+
+        <h2>Several cue lists</h2>
+        <p>A workspace can have many cue lists, for example one per act, or one for sound and one for lights. GO runs the list you're viewing. Click a list in the sidebar to switch to it. Move cues between lists with drag and drop, or right-click → <b>Move to list</b>.</p>
+
+        <h2>Re-triggering a cue that's already running</h2>
+        <p>In the cue's <b>Triggers</b> tab, <b>When re-triggered while running</b> decides what a second GO, hotkey or click does:</p>
+        <div class="table-wrap"><table>
+          <tr><th>Option</th><th>Behaviour</th></tr>
+          <tr><td>Ignore</td><td>Nothing happens. This is the default.</td></tr>
+          <tr><td>Restart</td><td>The cue starts again from the beginning.</td></tr>
+          <tr><td>Stop</td><td>The cue stops. Handy for toggling a sound on and off from a cart.</td></tr>
+          <tr><td>Pause / resume</td><td>The cue pauses, and the next trigger resumes it.</td></tr>
+        </table></div>
+      </section>
+
+      <section class="tab" id="panic">
+        <div class="crumb">Running a show</div>
+        <h1>Panic, pause and reset</h1>
+        <p class="intro">Three controls for when you need to stop or hold the show.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/panic.gif" alt="Several cues are running; pressing Esc fades them all out and Active Cues becomes empty" width="1280" height="757">
+          <figcaption><kbd>Esc</kbd> fades everything out.</figcaption>
+        </figure>
+
+        <h2>Panic</h2>
+        <ul>
+          <li>Press <kbd>Esc</kbd> or click <b>Panic</b> to fade out every running cue: sound, video and lights. The fade takes 1 second by default. Change it in <b>Settings → General → Panic fade time</b>.</li>
+          <li>Press <kbd>Esc</kbd> <b>again</b> during the fade to stop everything instantly (a hard stop).</li>
+          <li><b>Show → Hard Stop All</b> stops instantly without fading.</li>
+          <li>The playhead stays where it is, so you can carry on with GO afterwards.</li>
+        </ul>
+
+        <h2>Pause and resume</h2>
+        <ul>
+          <li><b>Pause</b> in the top bar pauses every running cue. Pre-waits and post-waits freeze too, so linked sequences stay in time. Click it again to resume.</li>
+          <li>Each cue in <b>Active Cues</b> has its own pause and stop buttons.</li>
+          <li><kbd>P</kbd> pauses or resumes the selected cue.</li>
+        </ul>
+
+        <h2>Reset</h2>
+        <p><b>Reset</b> stops everything and puts the playhead back at the top of the list, ready for the next performance. Any changes made by <b>Target</b> cues during the show are not undone by Reset; use a <b>Reset</b> cue for that (see <a href="#cue-types">cue types</a>).</p>
+
+        <div class="tip"><b>MIDI and remote:</b> you can also panic from a MIDI note (<a href="#midi">Settings → MIDI</a>), OSC (<code>/panic</code>) or the <a href="#remote">phone remote</a>.</div>
+      </section>
+
+      <section class="tab" id="show-mode">
+        <div class="crumb">Running a show</div>
+        <h1>Show Mode and safety</h1>
+        <p class="intro">NomadCue has several features that protect a performance from slips and crashes.</p>
+
+        <h2>Show Mode</h2>
+        <p>Click <b>Show Mode</b> in the top bar or press <kbd>⌘⇧M</kbd>. While it's on:</p>
+        <ul>
+          <li>Keyboard editing is switched off: <kbd>⌫</kbd> delete, <kbd>Enter</kbd> rename, <kbd>⌘G</kbd>, <kbd>⌘1</kbd>–<kbd>⌘0</kbd>, <kbd>⌥↑</kbd>/<kbd>⌥↓</kbd>, cut and paste.</li>
+          <li>Double-clicking a cue's number, name or wait no longer edits it.</li>
+          <li><kbd>S</kbd> (stop selected) and <kbd>V</kbd> (audition) are off, so a stray key can't stop or start a cue.</li>
+          <li><kbd>↑</kbd>/<kbd>↓</kbd> move the playhead directly.</li>
+          <li>Clicking a cue selects it without moving the playhead, so a stray click can't change what GO does next.</li>
+        </ul>
+        <p>Turn it off again the same way when you need to edit.</p>
+
+        <h2>Double-GO protection</h2>
+        <p>GO presses closer together than <b>0.2 seconds</b> are ignored, so a bounced key or nervous double-tap doesn't skip a cue. Change it in <b>Settings → General → Double-GO protection</b> (0 turns it off).</p>
+
+        <h2>Backups and autosave</h2>
+        <ul>
+          <li>Every save writes a timestamped copy into a <b>NomadCue Backups</b> folder next to the workspace. The 20 most recent are kept.</li>
+          <li>Once a workspace has been saved, NomadCue also backs up unsaved changes every 2 minutes. Change the interval in <b>Settings → General</b> (0 turns it off).</li>
+          <li>Closing the app with unsaved changes asks for confirmation.</li>
+        </ul>
+
+        <h2>Arming and flags</h2>
+        <ul>
+          <li><b>Disarm</b> a cue (untick <b>Armed</b> in Basics, or right-click → Armed) and it's skipped when it would run. Disarmed cues are dimmed. Use this to keep an optional effect in the list without it firing.</li>
+          <li><b>Flag</b> a cue to mark it for attention, for example something to fix at the next rehearsal. Flagged cues show ⚑ next to their number.</li>
+          <li><b>Arm</b> and <b>Disarm</b> cues change this during the show.</li>
+        </ul>
+
+        <h2>Warnings in the list</h2>
+        <ul>
+          <li><b>⚠ in the status column</b>: the cue's file is missing or its target cue no longer exists.</li>
+          <li><b>⚠ in the Then column</b>: the cue is set to <i>Start next when done</i> but never finishes on its own (a looping sound, a held image, a camera…). GO moves on to the next cue instead. Hover the ⚠ for the reason.</li>
+        </ul>
+      </section>
+
+      <section class="tab" id="carts">
+        <div class="crumb">Running a show</div>
+        <h1>Carts (sound pads)</h1>
+        <p class="intro">A cart is a grid of pads you can fire in any order: perfect for sound effects, stings and walk-in music that don't follow a fixed sequence.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/cart.gif" alt="Opening the SFX Cart, clicking the Doorbell and Applause pads, then pressing F to fire Phone ring" width="1280" height="757">
+          <figcaption>Click a pad, or press its hotkey.</figcaption>
+        </figure>
+
+        <h2>Making a cart</h2>
+        <ol>
+          <li>Click <b>+▦</b> next to <b>Cue Lists &amp; Carts</b> in the sidebar.</li>
+          <li>Drop sound files onto the empty grid, or add cues with the toolbar. Any cue type works on a cart.</li>
+          <li>Click the cart's name in the sidebar to rename it.</li>
+        </ol>
+
+        <h2>Using it</h2>
+        <ul>
+          <li><b>Click a pad</b> to fire it. A progress bar runs along the bottom while it plays, and it appears in Active Cues.</li>
+          <li><b>Hotkeys:</b> give a pad a single-key hotkey in its Triggers tab (shown on the pad). The key fires the pad from anywhere in the workspace, even while you're viewing the main cue list.</li>
+          <li><b>Click ✎</b> on a pad to select it and edit it in the Inspector without firing it.</li>
+          <li>Set <b>When re-triggered while running</b> to <b>Stop</b> to make a pad toggle on and off, or <b>Restart</b> to make it play from the top every time.</li>
+          <li>Give pads colours (right-click → colour swatches) to find them quickly.</li>
+        </ul>
+        <div class="note"><b>GO and carts:</b> carts don't have a playhead, so GO always runs the main sequence. Pads only fire when you click them or press their hotkey.</div>
+      </section>
+
+      <section class="tab" id="remote">
+        <div class="crumb">Running a show</div>
+        <h1>Phone remote</h1>
+        <p class="intro">Run the show from any phone, tablet or laptop on the same network, with nothing to install. Handy for focusing lights from the stage or running a rehearsal from the auditorium.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/remote.gif" alt="A phone browser showing NomadCue's remote: tapping GO starts cues on the computer, Fire starts a specific cue and Panic stops everything" width="1280" height="757">
+          <figcaption>The remote page (right) controlling the show.</figcaption>
+        </figure>
+
+        <h2>Turning it on</h2>
+        <ol>
+          <li>Open <b>Settings → Remote</b> and tick <b>Enable web remote</b>.</li>
+          <li>The port is <b>53100</b> by default. Change it if something else uses that port.</li>
+          <li>Optionally set a <b>passcode</b>. The remote asks for it before connecting.</li>
+          <li>The settings page lists the addresses to open, such as <code>http://192.168.1.12:53100/</code>. Hovering the 📱 button in the top bar shows them too.</li>
+          <li>On your phone, connect to the same Wi-Fi network and open that address in the browser.</li>
+        </ol>
+
+        <h2>What the remote can do</h2>
+        <ul>
+          <li><b>Standing by</b> shows the next cue and its notes.</li>
+          <li><b>GO</b>, <b>▲ Prev</b> and <b>▼ Next</b> (move the playhead), <b>Panic</b>, <b>Pause</b>, <b>Resume</b> and <b>Hard stop</b>.</li>
+          <li><b>Running cues</b> with live elapsed and total time, each with a <b>Stop</b> button.</li>
+          <li>The <b>cue list</b>: tap a name to move the playhead there, or <b>Fire</b> to start that cue straight away.</li>
+        </ul>
+
+        <div class="warn"><b>Use a passcode on shared networks.</b> Without one, anyone on the same network who knows the address can press GO. On a venue or public Wi-Fi, always set a passcode, or use a separate network for show control.</div>
+        <div class="tip"><b>Can't connect?</b> Check that both devices are on the same network, that your computer's firewall allows NomadCue (macOS and Windows ask the first time), and that you typed the address shown in Settings rather than <code>localhost</code>.</div>
+      </section>
+
+      <!-- ============================================================ BUILDING -->
+
+      <section class="tab" id="context-menu">
+        <div class="crumb">Building the cue list</div>
+        <h1>The right-click menu</h1>
+        <p class="intro">Right-click any cue to reach almost every action in one place. Right-click empty space in the list to add cues or paste.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/context-menu.gif" alt="Right-clicking a cue opens a menu with play, playhead, add, transition, pre-wait, fades, move, colour, armed, flagged, rename, duplicate, copy, cut and delete" width="1280" height="757">
+          <figcaption>Submenus open when you hover them.</figcaption>
+        </figure>
+
+        <div class="table-wrap"><table>
+          <tr><th>Item</th><th>What it does</th></tr>
+          <tr><td>Play now</td><td>Starts this cue without moving the playhead (<kbd>V</kbd>). Shows <b>Stop</b> if it's running.</td></tr>
+          <tr><td>Set playhead here</td><td>Makes this the next cue GO will start.</td></tr>
+          <tr><td>Add cue after</td><td>Pick a cue type to insert after this one. Groups also have <b>Add cue inside this group</b> and <b>Group mode</b>.</td></tr>
+          <tr><td>Paste after / inside group</td><td>Appears when you've copied or cut cues.</td></tr>
+          <tr><td>Then: …</td><td>Choose the <a href="#transitions">transition</a> to the next cue, and its post-wait.</td></tr>
+          <tr><td>Pre-wait: …</td><td>Quick presets (none, 0.5, 1, 2, 3, 5, 10 s) or <b>Custom…</b>.</td></tr>
+          <tr><td>Fades</td><td>For media cues: add a fade-out after, crossfade into the next cue, and set the fade-in. See <a href="#fades">Fades</a>.</td></tr>
+          <tr><td>Move up / Move down</td><td>Same as <kbd>⌥↑</kbd>/<kbd>⌥↓</kbd>.</td></tr>
+          <tr><td>Move into group</td><td>Pick any group in the list, or <b>New group from selection</b> (<kbd>⌘G</kbd>).</td></tr>
+          <tr><td>Move out of group</td><td>Moves the cue to just after its group.</td></tr>
+          <tr><td>Move to list</td><td>Sends the cue to another cue list or cart.</td></tr>
+          <tr><td>Colour swatches</td><td>Colours the cue's left edge so you can spot it in the list.</td></tr>
+          <tr><td>Armed / Flagged</td><td>Toggle arming and the attention flag. See <a href="#show-mode">Show Mode and safety</a>.</td></tr>
+          <tr><td>Rename… / Renumber…</td><td>Edit the name or number in a dialog.</td></tr>
+          <tr><td>Duplicate, Copy, Cut</td><td>As in any editor (<kbd>⌘D</kbd>, <kbd>⌘C</kbd>, <kbd>⌘X</kbd>).</td></tr>
+          <tr><td>Delete cue</td><td>Removes the cue (<kbd>⌫</kbd>). Undo with <kbd>⌘Z</kbd>.</td></tr>
+        </table></div>
+        <div class="tip"><b>Several cues at once:</b> select cues with <kbd>⌘</kbd>-click or <kbd>⇧</kbd>-click first, then right-click one of them. Most actions apply to the whole selection.</div>
+        <div class="tip"><b>Keyboard:</b> while a menu is open, use the arrow keys to move, <kbd>→</kbd> to open a submenu, <kbd>Enter</kbd> to choose and <kbd>Esc</kbd> to close.</div>
+      </section>
+
+      <section class="tab" id="transitions">
+        <div class="crumb">Building the cue list</div>
+        <h1>Transitions</h1>
+        <p class="intro">Every cue has a <b>Then</b> setting that decides what happens to the next cue. This is how you build sequences that run on one GO.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/transitions.gif" alt="Clicking the Then column of cue 2 and choosing Start next when done, then cue 4 Start next with this; blue lines link the cues and the Inspector explains the result" width="1280" height="757">
+          <figcaption>Click the <b>Then</b> column to pick a transition. Linked cues are joined by a blue line.</figcaption>
+        </figure>
+
+        <h2>The three transitions</h2>
+        <div class="table-wrap"><table>
+          <tr><th>Then</th><th>Shown as</th><th>What happens</th></tr>
+          <tr><td>Wait for GO</td><td>GO</td><td>The next cue waits until you press GO. This is the default.</td></tr>
+          <tr><td>Start next with this</td><td>↓ with this</td><td>Also called <i>auto-continue</i>. The next cue starts after this cue's <b>post-wait</b>, counted from when this cue <i>starts</i>. With a post-wait of 0 they start together.</td></tr>
+          <tr><td>Start next when done</td><td>↓ when done</td><td>Also called <i>auto-follow</i>. The next cue starts when this cue <i>finishes</i>.</td></tr>
+        </table></div>
+
+        <h2>Three ways to set it</h2>
+        <ol>
+          <li>Click the <b>Then</b> column of a cue.</li>
+          <li>Right-click the cue → <b>Then: …</b>.</li>
+          <li>In the Inspector's Basics tab, click one of the three cards under <b>Timing &amp; transition to the next cue</b>.</li>
+        </ol>
+
+        <h2>Reading the timeline</h2>
+        <p>Below the cards, the Inspector draws a small timeline and explains the result in plain English, for example:</p>
+        <pre><code>GO starts "2 · Doorbell" immediately. When it finishes, "3 · Lights up" starts automatically.</code></pre>
+        <p>Use it to check a sequence before rehearsal.</p>
+
+        <h2>Examples</h2>
+        <ul>
+          <li><b>Sound and light together:</b> set the sound cue to <i>Start next with this</i> with post-wait 0. One GO starts both.</li>
+          <li><b>A thunderclap 2 seconds after the lightning:</b> lightning cue → <i>Start next with this</i>, post-wait 2 s.</li>
+          <li><b>A playlist:</b> set each song to <i>Start next when done</i>. The last song is set to <i>Wait for GO</i>.</li>
+        </ul>
+
+        <div class="warn"><b>⚠ in the Then column:</b> <i>Start next when done</i> can never fire if the cue never ends on its own: a looping sound, an image or text held until stopped, a camera. GO skips to the next cue instead. Give the cue a duration or a number of plays, or use <i>Start next with this</i> with a post-wait.</div>
+        <div class="tip"><b>Groups:</b> for several cues that should start together, a <a href="#groups">group</a> set to "start all" is often tidier than chaining them.</div>
+      </section>
+
+      <section class="tab" id="waits">
+        <div class="crumb">Building the cue list</div>
+        <h1>Pre-wait and post-wait</h1>
+        <p class="intro">Waits add timing to a cue without needing an extra Wait cue.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/waits.gif" alt="Double-clicking the Post-wait cell of cue 1 and typing 2 switches it to Start next with this; double-clicking Pre-wait of cue 3 and typing 1.5" width="1280" height="757">
+          <figcaption>Double-click a wait cell, type a time, press <kbd>Enter</kbd>.</figcaption>
+        </figure>
+
+        <div class="table-wrap"><table>
+          <tr><th>Wait</th><th>What it does</th></tr>
+          <tr><td>Pre-wait</td><td>A delay between the trigger and the cue actually starting. The status column shows ◌ while a cue is waiting.</td></tr>
+          <tr><td>Post-wait</td><td>Only used with <i>Start next with this</i>: the time from when this cue starts until the next cue starts.</td></tr>
+        </table></div>
+
+        <h2>Editing waits</h2>
+        <ul>
+          <li><b>In the list:</b> double-click the Pre-wait or Post-wait cell, type the time and press <kbd>Enter</kbd> (or <kbd>Esc</kbd> to cancel). An empty cell shows — when you hover it.</li>
+          <li><b>In the Inspector:</b> the Basics tab has Pre-wait and Post-wait fields.</li>
+          <li><b>From the menu:</b> right-click → <b>Pre-wait</b> or <b>Then → Post-wait</b> for presets.</li>
+        </ul>
+        <p>Times can be typed as seconds (<code>2</code>, <code>1.5</code>) or as <code>mm:ss.ss</code> (<code>01:30.00</code>).</p>
+        <div class="tip"><b>Setting a post-wait switches the cue to <i>Start next with this</i></b> automatically, because that's the only transition that uses it.</div>
+        <div class="note"><b>Pausing freezes waits.</b> If you pause the show during a pre-wait or post-wait, the wait resumes from where it stopped.</div>
+      </section>
+
+      <section class="tab" id="fades">
+        <div class="crumb">Building the cue list</div>
+        <h1>Fades and crossfades</h1>
+        <p class="intro">Fade cues change a running cue smoothly over time: level, output levels, speed, video opacity, position and more.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/crossfade.gif" alt="Right-click Preshow music, Fades, Crossfade into next cue: a crossfade cue is inserted, and GO then fades the music out while the next cue starts" width="1280" height="757">
+          <figcaption><b>Crossfade into next cue</b> builds the whole crossfade for you.</figcaption>
+        </figure>
+
+        <h2>One-click fades</h2>
+        <p>Right-click an audio, video, text, camera or mic cue → <b>Fades</b>:</p>
+        <ul>
+          <li><b>Add fade-out after (3 s)</b> or <b>Add fade-out after…</b> (choose the time): inserts a Fade cue that fades this cue out and stops it.</li>
+          <li><b>Crossfade into next cue (3 s)</b> or <b>…</b>: inserts a Fade cue linked so that <b>one GO</b> fades this cue out while the next cue starts. The next cue must be an audio, video, camera, text or mic cue.</li>
+          <li><b>Fade in</b>: makes the cue itself fade in when it starts (none, 0.5, 1, 2, 3 or 5 s).</li>
+        </ul>
+
+        <h2>Fade cues in detail</h2>
+        <p>Add a Fade cue from the toolbar, then set its target and what it fades in the <b>Fade</b> tab:</p>
+        <div class="table-wrap"><table>
+          <tr><th>Field</th><th>Meaning</th></tr>
+          <tr><td>Target cue</td><td>The cue to fade. It must be running when the fade starts.</td></tr>
+          <tr><td>Duration</td><td>How long the fade takes.</td></tr>
+          <tr><td>Curve</td><td>S-curve (default, natural for most fades), Linear, Equal power (best for crossfades), Exponential, Logarithmic.</td></tr>
+          <tr><td>Stop target when done</td><td>Stops the target at the end, which you want for fade-outs.</td></tr>
+          <tr><td>Fade master level</td><td>Fades an audio cue's overall level to the value in dB. -60 dB is silent.</td></tr>
+          <tr><td>Fade output levels</td><td>Fades individual outputs, for example to move a sound from the left to the right speakers. Leave an output empty to leave it unchanged.</td></tr>
+          <tr><td>Fade playback rate</td><td>Changes speed and pitch smoothly (1 = normal).</td></tr>
+          <tr><td>Fade opacity</td><td>For video, image, text and camera cues. 0 is invisible.</td></tr>
+          <tr><td>Fade geometry</td><td>Moves, scales or rotates a video cue to new X, Y, Scale % and Rotation.</td></tr>
+          <tr><td>Fade video volume</td><td>Fades the sound of a video file.</td></tr>
+        </table></div>
+        <p>You can tick several boxes in one Fade cue, for example fading a video's opacity and volume together.</p>
+        <div class="tip"><b>Fading lights:</b> light cues fade by themselves. Each has its own fade time and curve. See <a href="#lighting">Lighting</a>.</div>
+      </section>
+
+      <section class="tab" id="groups">
+        <div class="crumb">Building the cue list</div>
+        <h1>Groups</h1>
+        <p class="intro">A group holds other cues. It keeps long lists tidy and decides how its cues start: all together, in sequence, one per GO, or at random.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/groups.gif" alt="A step group: each Space press fires the next cue inside the group, then the playhead moves on to the cue after the group" width="1280" height="757">
+          <figcaption>A group in <b>step</b> mode: each GO fires the next cue inside it.</figcaption>
+        </figure>
+
+        <h2>Making a group</h2>
+        <ul>
+          <li>Select some cues and press <kbd>⌘G</kbd> (or right-click → <b>Move into group → New group from selection</b>).</li>
+          <li>Or add an empty Group cue from the toolbar (<kbd>⌘0</kbd>) and drag cues onto the middle of it, or use its <b>+ add inside</b> button.</li>
+          <li>Click ▾ to fold a group. Right-click a cue inside → <b>Move out of group</b> to take it out.</li>
+        </ul>
+
+        <h2>Group modes</h2>
+        <p>Set the mode in the group's <b>Group</b> tab, or right-click → <b>Group mode</b>:</p>
+        <div class="table-wrap"><table>
+          <tr><th>Mode</th><th>What GO does</th><th>Good for</th></tr>
+          <tr><td>Step through</td><td>Each GO starts the next child, one at a time. After the last child, the playhead moves past the group.</td><td>A scene with several cues you want to keep together but run separately.</td></tr>
+          <tr><td>Start first child</td><td>Starts the first child. The others follow their own transitions.</td><td>A sequence that's linked inside the group.</td></tr>
+          <tr><td>Start all</td><td>Starts every child at the same moment.</td><td>Sound, video and light that always go together.</td></tr>
+          <tr><td>Random</td><td>Starts one child at random.</td><td>Varied doorbells, crowd reactions, installations.</td></tr>
+        </table></div>
+        <p>The Target column shows the mode, for example <i>3 cues · all at once</i>. A group counts as running while any of its children run, and stopping it stops them all.</p>
+        <div class="tip"><b>Inside a group:</b> clicking a child cue puts the playhead on it, so you can restart a step group partway through.</div>
+      </section>
+
+      <section class="tab" id="cue-types">
+        <div class="crumb">Building the cue list</div>
+        <h1>All 25 cue types</h1>
+        <p class="intro">What each cue does and where to find its settings. Every cue also has the Basics and Triggers tabs described in <a href="#interface">The main window</a>.</p>
+
+        <h2>Media</h2>
+        <div class="table-wrap"><table>
+          <tr><th>Cue</th><th>What it does</th><th>Details</th></tr>
+          <tr><td>♪ Audio</td><td>Plays a sound file with level, routing, fades, loops and effects.</td><td><a href="#audio">Audio</a></td></tr>
+          <tr><td>◉ Mic</td><td>Routes a live input (microphone, line in) to the outputs, with effects.</td><td><a href="#audio">Audio</a></td></tr>
+          <tr><td>▶ Video</td><td>Plays a video or shows an image on a stage.</td><td><a href="#video">Video</a></td></tr>
+          <tr><td>◎ Camera</td><td>Shows a live camera on a stage.</td><td><a href="#video">Video</a></td></tr>
+          <tr><td>T Text</td><td>Shows text (titles, surtitles, captions) on a stage.</td><td><a href="#video">Video</a></td></tr>
+          <tr><td>☀ Light</td><td>Fades lights to a look written in the lighting command language.</td><td><a href="#lighting">Lighting</a></td></tr>
+          <tr><td>◢ Fade</td><td>Fades a running cue's level, opacity, position, rate or volume.</td><td><a href="#fades">Fades</a></td></tr>
+        </table></div>
+
+        <h2>Control</h2>
+        <div class="table-wrap"><table>
+          <tr><th>Cue</th><th>What it does</th><th>Details</th></tr>
+          <tr><td>⇄ Network</td><td>Sends OSC or plain-text UDP messages to other devices.</td><td><a href="#osc">OSC and UDP</a></td></tr>
+          <tr><td>♫ MIDI</td><td>Sends a MIDI note, control change, program change, pitch bend, MIDI Show Control or SysEx message.</td><td><a href="#midi">MIDI</a></td></tr>
+          <tr><td>♬ MIDI File</td><td>Plays a standard MIDI file to a MIDI output.</td><td><a href="#midi">MIDI</a></td></tr>
+          <tr><td>⏱ Timecode</td><td>Sends MIDI timecode (MTC) for a set duration from a start time.</td><td><a href="#midi">MIDI</a></td></tr>
+          <tr><td>{} Script</td><td>Runs JavaScript that can control cues, lights and the network.</td><td><a href="#scripts">Scripts</a></td></tr>
+        </table></div>
+
+        <h2>Logic: cues that act on other cues</h2>
+        <p>These have a <b>Target cue</b> field in their tab. Choose the cue they act on from the list.</p>
+        <div class="table-wrap"><table>
+          <tr><th>Cue</th><th>What it does to the target</th></tr>
+          <tr><td>▷ Start</td><td>Starts it, as if it had been triggered.</td></tr>
+          <tr><td>■ Stop</td><td>Stops it, with an optional fade time.</td></tr>
+          <tr><td>❙❙ Pause</td><td>Pauses it.</td></tr>
+          <tr><td>⤓ Load</td><td>Preloads an audio file so it starts instantly later.</td></tr>
+          <tr><td>↺ Reset</td><td>Stops it and undoes any change a Target cue made to it.</td></tr>
+          <tr><td>↬ Devamp</td><td>Ends a looping cue's loop so it plays to its end. Optionally starts the cue after the target when it finishes. Perfect for vamps under dialogue.</td></tr>
+          <tr><td>↪ GoTo</td><td>Moves the playhead to the target, without starting it.</td></tr>
+          <tr><td>⌖ Target</td><td>Changes the target's file (for media cues) or target cue (for control cues) to a new one. Lets one cue play different files on different nights.</td></tr>
+          <tr><td>✓ Arm</td><td>Arms the target so it runs.</td></tr>
+          <tr><td>✕ Disarm</td><td>Disarms the target so it's skipped.</td></tr>
+        </table></div>
+
+        <h2>Structure</h2>
+        <div class="table-wrap"><table>
+          <tr><th>Cue</th><th>What it does</th></tr>
+          <tr><td>▦ Group</td><td>Holds other cues. See <a href="#groups">Groups</a>.</td></tr>
+          <tr><td>⌛ Wait</td><td>Does nothing for its duration. Useful in a sequence linked with <i>Start next when done</i>.</td></tr>
+          <tr><td>✎ Memo</td><td>Does nothing. A note in the list: "Interval", "Wait for applause", "Check radio mics".</td></tr>
+        </table></div>
+      </section>
+
+      <!-- ============================================================ MEDIA -->
+
+      <section class="tab" id="audio">
+        <div class="crumb">Media</div>
+        <h1>Audio and mic cues</h1>
+        <p class="intro">Audio cues play sound files. Mic cues route a live input. Both have per-output levels, a full routing matrix and a built-in effects chain.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/audio.gif" alt="Selecting an audio cue and going through its Inspector tabs: Basics, Time and Loops with a waveform, Levels and Audio Effects, then pressing V to audition" width="1280" height="757">
+          <figcaption>The audio cue's Inspector tabs. <kbd>V</kbd> auditions the cue.</figcaption>
+        </figure>
+
+        <h2>Time &amp; Loops tab</h2>
+        <div class="table-wrap"><table>
+          <tr><th>Field</th><th>Meaning</th></tr>
+          <tr><td>Waveform</td><td>A picture of the sound. The marked region is the part that plays.</td></tr>
+          <tr><td>File</td><td>The sound file. Click to choose another. <b>▶ Audition</b> plays the cue.</td></tr>
+          <tr><td>Start time / End time</td><td>Play only part of the file (a <i>slice</i>). End time 0 means the end of the file.</td></tr>
+          <tr><td>Plays</td><td>How many times the slice plays. <b>0 loops forever</b> until stopped or devamped.</td></tr>
+          <tr><td>Rate</td><td>Playback speed. 1 is normal, 0.5 half speed, 2 double. Pitch changes with speed.</td></tr>
+          <tr><td>Fade in / Fade out at end</td><td>Built-in fades at the start and end, in seconds.</td></tr>
+        </table></div>
+
+        <h2>Levels tab</h2>
+        <ul>
+          <li><b>Cue level (master)</b>: overall level in dB. 0 is the file's own level and -60 is silent.</li>
+          <li><b>Output levels (dB)</b>: one level per output of your audio interface, so you can send a sound to specific speakers.</li>
+          <li><b>Crosspoint matrix</b>: a grid of file channels (rows) against outputs (columns). Each cell is a level in dB; empty means not connected. Double-click a cell to switch between 0 dB and off. <b>Reset to default</b> goes back to the standard routing.</li>
+        </ul>
+        <p>The number of outputs comes from <b>Settings → Audio</b>, and is as many as your interface provides.</p>
+
+        <h2>Audio Effects tab</h2>
+        <p>Each effect has its own on/off switch, so you only use what you need:</p>
+        <div class="table-wrap"><table>
+          <tr><th>Effect</th><th>Controls</th></tr>
+          <tr><td>Filters</td><td>High-pass frequency (cut rumble, default 80 Hz) and low-pass frequency (soften, default 12 kHz).</td></tr>
+          <tr><td>3-band EQ</td><td>Low (200 Hz) gain, Mid frequency, gain and Q, High (4 kHz) gain.</td></tr>
+          <tr><td>Compressor</td><td>Threshold, Ratio, Attack, Release.</td></tr>
+          <tr><td>Delay</td><td>Time, Feedback, Mix.</td></tr>
+          <tr><td>Reverb</td><td>Size, Mix.</td></tr>
+        </table></div>
+
+        <h2>Mic cues</h2>
+        <p>A Mic cue has an <b>Input</b> tab (input device and number of input channels) plus the same <b>Levels</b> and <b>Audio Effects</b> tabs. It runs until stopped. The first time, your system asks for permission to use the microphone.</p>
+
+        <h2>Monitoring</h2>
+        <ul>
+          <li>The small meters at the bottom-right show the outputs. Click them, or choose <b>Window → Audio Output Meters</b>, for large meters.</li>
+          <li>Output names, levels and mutes are in <b>Settings → Audio</b>.</li>
+        </ul>
+      </section>
+
+      <section class="tab" id="video">
+        <div class="crumb">Media</div>
+        <h1>Video, images and text</h1>
+        <p class="intro">Video, Camera and Text cues all appear on a <b>stage</b>: an output window you can put on any screen or projector.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/video.gif" alt="Pressing Space three times: a video plays on the stage window, then a title slide appears over it, then a text surtitle" width="1280" height="757">
+          <figcaption>The stage output (bottom right) as video, an image and text cues run.</figcaption>
+        </figure>
+
+        <h2>Video cues</h2>
+        <p>Drop a video or image file onto the window, or click <b>Video</b> in the toolbar. The <b>Media</b> tab has:</p>
+        <div class="table-wrap"><table>
+          <tr><th>Field</th><th>Meaning</th></tr>
+          <tr><td>File (video or image)</td><td>MP4, MOV, WebM, MKV, M4V, or an image: PNG, JPEG, GIF, WebP, SVG.</td></tr>
+          <tr><td>Start time / End time</td><td>Play part of the video. End time 0 means the end.</td></tr>
+          <tr><td>Plays</td><td>Number of times to play. 0 loops forever.</td></tr>
+          <tr><td>Rate</td><td>Playback speed.</td></tr>
+          <tr><td>Volume</td><td>The video's own sound, in dB.</td></tr>
+          <tr><td>Image hold time</td><td>How long an image stays up. 0 keeps it up until stopped.</td></tr>
+        </table></div>
+
+        <h2>Text cues</h2>
+        <p>For titles, surtitles, captions and signs. The <b>Text</b> tab has the text (several lines allowed), Font, Size, Weight, Align (left, centre, right), Color, Background (a colour or <code>transparent</code>) and Duration (0 keeps it up until stopped).</p>
+
+        <h2>Camera cues</h2>
+        <p>Show a live camera, such as a webcam or capture card, on a stage. Choose the device in the <b>Camera</b> tab and tick <b>Mirror</b> to flip it. Your system asks for camera permission the first time.</p>
+
+        <h2>Geometry tab</h2>
+        <p>Video, Camera and Text cues share these controls:</p>
+        <div class="table-wrap"><table>
+          <tr><th>Field</th><th>Meaning</th></tr>
+          <tr><td>Stage</td><td>Which output window the cue appears on.</td></tr>
+          <tr><td>Layer</td><td>Higher layers appear on top of lower ones.</td></tr>
+          <tr><td>Opacity</td><td>0 (invisible) to 100.</td></tr>
+          <tr><td>X / Y</td><td>Move the picture.</td></tr>
+          <tr><td>Scale % / Rotation</td><td>Resize and rotate.</td></tr>
+          <tr><td>Fit</td><td><b>contain</b> (whole picture, may letterbox), <b>cover</b> (fills, may crop), <b>fill</b> (stretches), <b>none</b>, <b>scale-down</b>.</td></tr>
+          <tr><td>Blend mode</td><td>How the cue mixes with the layers below: normal, multiply, screen, overlay, darken, lighten, color-dodge, color-burn, hard-light, soft-light, difference, exclusion, hue, saturation, color, luminosity.</td></tr>
+          <tr><td>Crop / mask (%)</td><td>Trim the top, right, bottom and left edges.</td></tr>
+          <tr><td>Fade in</td><td>Fade up from invisible when the cue starts.</td></tr>
+        </table></div>
+
+        <h2>Video Effects tab</h2>
+        <p>Blur, Brightness, Contrast, Saturation, Hue rotate, Grayscale, Invert and Sepia. Changes show live on the stage while the cue runs.</p>
+
+        <div class="tip"><b>Fading video:</b> use a <a href="#fades">Fade cue</a> to fade opacity, move the picture or fade the video's volume, or right-click → <b>Fades → Crossfade into next cue</b>.</div>
+      </section>
+
+      <section class="tab" id="stages">
+        <div class="crumb">Media</div>
+        <h1>Stages and projection</h1>
+        <p class="intro">A stage is an output window. You can have as many as you like, one per projector or screen, each with its own keystone and edge blending.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/settings.gif" alt="Workspace Settings: going through the Audio, Video Stages, Lighting, OSC, MIDI and Remote tabs" width="1280" height="757">
+          <figcaption>Stages are set up in <b>Settings → Video Stages</b>.</figcaption>
+        </figure>
+
+        <h2>Setting up a stage</h2>
+        <ol>
+          <li>Open <b>Settings → Video Stages</b>. Every workspace starts with one stage, <b>Main Stage</b>.</li>
+          <li>Choose the <b>Display</b> it should appear on. With a projector connected, pick the projector.</li>
+          <li>Tick <b>Fullscreen on display</b> to fill that screen without window borders. Otherwise set the window width and height.</li>
+          <li>Click <b>Open / update</b> to show it. <b>Identify</b> flashes the stage's name on its screen so you can tell outputs apart.</li>
+          <li>Click <b>+ Add stage</b> for more outputs. Then choose the stage in each cue's Geometry tab.</li>
+        </ol>
+        <p><b>Window → Open All Stages</b> opens every stage at once. Stages also open automatically when a cue plays on them.</p>
+
+        <h2>Stage options</h2>
+        <div class="table-wrap"><table>
+          <tr><th>Option</th><th>Meaning</th></tr>
+          <tr><td>Name</td><td>Shown in cue Geometry tabs and by Identify.</td></tr>
+          <tr><td>Display</td><td>Which screen the stage opens on.</td></tr>
+          <tr><td>Window W / H</td><td>Size when not fullscreen.</td></tr>
+          <tr><td>Fullscreen on display</td><td>Fill the chosen screen.</td></tr>
+          <tr><td>Background</td><td>Colour shown when nothing is playing (normally black).</td></tr>
+          <tr><td>Edge blend left / right</td><td>Soft-edge width in pixels, for blending two overlapping projectors into one wide picture.</td></tr>
+          <tr><td>Corner-pin warp / keystone</td><td>Tick to move each corner of the picture. This corrects a projector that's off-centre or at an angle, or maps the picture onto a flat surface. Corners use 0–1 coordinates: top-left is 0,0 and bottom-right is 1,1.</td></tr>
+        </table></div>
+
+        <div class="tip"><b>Two projectors, one picture:</b> make two stages on the two projectors, overlap the projected images a little, set an edge blend on the inner edges (right of the left stage, left of the right stage), and position the same video on both with the Geometry X offset.</div>
+      </section>
+
+      <!-- ============================================================ LIGHTING -->
+
+      <section class="tab" id="lighting">
+        <div class="crumb">Lighting</div>
+        <h1>Lighting</h1>
+        <p class="intro">NomadCue controls DMX lights over the network using Art-Net or sACN (E1.31), with unlimited universes. Write looks as simple text commands, or build them on the dashboard.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/lighting.gif" alt="The Light Dashboard: typing front = 75, 2 thru 3 = 40 and wash.color = #ff8800 moves the faders, then Fade out 3s brings everything down" width="1280" height="757">
+          <figcaption>The Light Dashboard: type a command and press <kbd>Enter</kbd>.</figcaption>
+        </figure>
+
+        <h2>1. Connect to your lights</h2>
+        <p>You need an Art-Net or sACN node (or a console or fixtures that accept them) on the same network as the computer. In <b>Settings → Lighting</b>:</p>
+        <div class="table-wrap"><table>
+          <tr><th>Setting</th><th>Meaning</th></tr>
+          <tr><td>Protocol</td><td><b>Art-Net</b> or <b>sACN</b> (E1.31).</td></tr>
+          <tr><td>Destination IP</td><td>Art-Net: <code>255.255.255.255</code> (broadcast, the default) or your node's IP. sACN: leave blank or use the broadcast address for multicast.</td></tr>
+          <tr><td>Universe offset</td><td>Added to every universe number, if your node counts from 0 or from a different universe.</td></tr>
+          <tr><td>Refresh (Hz)</td><td>How often DMX is sent. 40 is standard.</td></tr>
+          <tr><td>Output DMX</td><td>Turns network output on or off. Turn it off to programme without sending to the rig.</td></tr>
+        </table></div>
+
+        <h2>2. Patch your instruments</h2>
+        <p>Still in Settings → Lighting, add one row per light: <b>number</b>, <b>name</b>, <b>type</b>, <b>universe</b> and <b>address</b>. The channels column shows which DMX channels it uses. <b>+ 12 dimmers</b> adds a block of dimmers at once.</p>
+        <div class="table-wrap"><table>
+          <tr><th>Type</th><th>Parameters (consecutive channels)</th></tr>
+          <tr><td>Dimmer</td><td>intensity</td></tr>
+          <tr><td>RGB</td><td>red, green, blue</td></tr>
+          <tr><td>RGBW</td><td>red, green, blue, white</td></tr>
+          <tr><td>Intensity + RGB</td><td>intensity, red, green, blue</td></tr>
+          <tr><td>Intensity + RGBW</td><td>intensity, red, green, blue, white</td></tr>
+          <tr><td>RGBWA</td><td>red, green, blue, white, amber</td></tr>
+          <tr><td>Moving head (basic)</td><td>pan, tilt, intensity, red, green, blue</td></tr>
+        </table></div>
+        <p><b>Groups</b> (below the patch) give a name to several instruments. Enter the group name and its members as instrument numbers separated by spaces (<code>1 2 3</code>). Then <code>frontwash = 60</code> sets them all.</p>
+
+        <h2>3. The command language</h2>
+        <p>One command per line. Values are percentages from 0 to 100.</p>
+        <pre><code>front = 75            # an instrument or group, by name
+1 = 50                # by number
+1 thru 6 = full       # ranges ("thru", "through" or "-"); full = 100
+1 + 3 + 5 = 40        # lists
+wash.red = 100        # one parameter
+wash.color = #ff8800  # a colour, for RGB(W) instruments
+back = half           # half = 50
+all = out             # every instrument; out (or off) = 0</code></pre>
+        <p>A bare value on an RGB instrument without an intensity channel dims all its colours together, so it behaves like a dimmer.</p>
+
+        <h2>4. Light cues</h2>
+        <ol>
+          <li>Add a Light cue (<kbd>⌘6</kbd>) and open its <b>Levels</b> tab.</li>
+          <li>Type commands in <b>Commands</b>. The line below shows what they resolve to, or an error if a name isn't patched.</li>
+          <li>Set the <b>Fade time</b> and <b>Curve</b>.</li>
+          <li><b>Preview (snap)</b> sends the look to the rig instantly so you can check it.</li>
+        </ol>
+        <p>Light cues only change what they mention. Anything else stays where it was, so cues can build on each other. End a scene with <code>all = out</code> for a blackout.</p>
+
+        <h2>5. The Light Dashboard</h2>
+        <p>Open it with ☀ in the top bar or <kbd>⌘⇧L</kbd>. It shows a fader for every parameter of every instrument, live.</p>
+        <ul>
+          <li>Drag faders, or type a command in the command line and press <kbd>Enter</kbd>.</li>
+          <li><b>Blackout</b> sets everything to 0 instantly, and <b>Fade out 3s</b> fades it.</li>
+          <li><b>Copy look</b> copies the current levels as commands you can paste into a cue.</li>
+          <li>In a Light cue, <b>Record current dashboard look</b> replaces the cue's commands with what's on the dashboard. Build the look by eye, then record it in one click.</li>
+        </ul>
+        <div class="tip"><b>Scripts can light too:</b> <code>nq.light('front = 40', 3)</code> fades front to 40% over 3 seconds. See <a href="#scripts">Script cues</a>.</div>
+      </section>
+
+      <!-- ============================================================ CONTROL -->
+
+      <section class="tab" id="osc">
+        <div class="crumb">Control and automation</div>
+        <h1>OSC and UDP</h1>
+        <p class="intro">Other software and hardware (lighting consoles, show controllers, phones, programming tools) can control NomadCue over the network, and Network cues can control them.</p>
+
+        <h2>Receiving: controlling NomadCue</h2>
+        <p>Turn on <b>Accept OSC &amp; UDP control</b> in <b>Settings → OSC / Network</b>.</p>
+        <div class="table-wrap"><table>
+          <tr><th>Port</th><th>Default</th><th>Use</th></tr>
+          <tr><td>OSC port (UDP)</td><td>53000</td><td>Send OSC messages here.</td></tr>
+          <tr><td>Reply port</td><td>53001</td><td>Replies to queries such as <code>/cueLists</code> are sent back to the sender on this port.</td></tr>
+          <tr><td>Plain-text UDP port</td><td>53535</td><td>Send plain text lines such as <code>/go</code>. Useful for devices that can't send real OSC.</td></tr>
+        </table></div>
+
+        <h3>Commands</h3>
+        <pre><code>/go                       GO
+/go/{number}              GO from cue {number}
+/stop  /hardStop  /panic  /panicInTime {seconds}
+/pause  /resume  /reset
+/playhead/next  /playhead/previous  /playhead/{number}
+/select/{number}
+/cue/{number}/start | stop | pause | resume | togglePause | load | arm | disarm
+/cue/{number}/name [new name]       read or set a cue's name
+/cue/selected/start   /cue/playhead/start
+/cueLists  /runningCues  /version   queries (reply on the reply port)
+/connect {passcode}</code></pre>
+        <p>Any command can be prefixed with <code>/workspace/{name}</code>.</p>
+
+        <h3>Passcode</h3>
+        <p>Set a <b>Passcode</b> to stop other devices on the network controlling the show. Clients must send <code>/connect {passcode}</code> first.</p>
+        <div class="warn"><b>OSC is on by default with no passcode.</b> On a network you share with others, set a passcode or untick <b>Accept OSC &amp; UDP control</b>.</div>
+
+        <h2>Sending: Network cues</h2>
+        <p>A Network cue sends one or more messages when it runs. In its <b>Network</b> tab:</p>
+        <div class="table-wrap"><table>
+          <tr><th>Field</th><th>Meaning</th></tr>
+          <tr><td>Protocol</td><td><b>OSC (UDP)</b> or <b>Plain UDP text</b>.</td></tr>
+          <tr><td>Host / Port</td><td>The receiving device's IP address and port.</td></tr>
+          <tr><td>Message(s)</td><td>One message per line. OSC format: <code>/address arg1 2 3.5 "quoted string"</code>. Numbers are sent as numbers, and text in quotes as a string.</td></tr>
+        </table></div>
+        <pre><code>/eos/cue/1/12/fire
+/scene/recall 4
+/text "Welcome to the show"</code></pre>
+        <p>Use <code>255.255.255.255</code> as the host to broadcast to every device on the network.</p>
+      </section>
+
+      <section class="tab" id="midi">
+        <div class="crumb">Control and automation</div>
+        <h1>MIDI, MSC and timecode</h1>
+        <p class="intro">Trigger cues from keyboards, pads and consoles, send MIDI to other gear, and sync with MIDI Show Control and MIDI timecode.</p>
+
+        <h2>Setup</h2>
+        <p>In <b>Settings → MIDI</b>:</p>
+        <div class="table-wrap"><table>
+          <tr><th>Setting</th><th>Meaning</th></tr>
+          <tr><td>MIDI input</td><td>A specific device or <b>All inputs</b>.</td></tr>
+          <tr><td>Default MIDI output</td><td>Used by MIDI, MIDI File and Timecode cues that don't name their own output.</td></tr>
+          <tr><td>GO on note number</td><td>A note that acts as GO, for example a foot pedal or pad.</td></tr>
+          <tr><td>Panic on note number</td><td>A note that acts as Panic.</td></tr>
+          <tr><td>MSC device ID</td><td>NomadCue's MIDI Show Control device ID.</td></tr>
+          <tr><td>Respond to MIDI Show Control</td><td>Accept MSC commands from a console (see below).</td></tr>
+        </table></div>
+
+        <h3>MIDI Show Control commands NomadCue responds to</h3>
+        <div class="table-wrap"><table>
+          <tr><th>MSC command</th><th>NomadCue does</th></tr>
+          <tr><td>GO</td><td>GO, or with a cue number, GO from that cue.</td></tr>
+          <tr><td>FIRE</td><td>GO from the given cue number.</td></tr>
+          <tr><td>STOP</td><td>With a cue number, stops that cue. Without, pauses everything.</td></tr>
+          <tr><td>RESUME</td><td>Resumes everything.</td></tr>
+          <tr><td>ALL_OFF</td><td>Hard stop.</td></tr>
+          <tr><td>RESET</td><td>Stops everything and returns the playhead to the top.</td></tr>
+        </table></div>
+        <p>Commands are accepted when sent to device ID 127 (all) or to NomadCue's MSC device ID.</p>
+        <div class="tip"><b>macOS virtual ports:</b> to send MIDI between apps on the same Mac, enable the <b>IAC Driver</b> in <b>Audio MIDI Setup</b>.</div>
+
+        <h2>Triggering a cue from MIDI</h2>
+        <ol>
+          <li>Select the cue and open its <b>Triggers</b> tab.</li>
+          <li>Under <b>MIDI trigger</b>, click <b>MIDI Learn</b> and play the note, move the controller or send the program change. Or set the type (note, control change or program change), channel (0 = any) and number by hand.</li>
+          <li>That message now fires the cue. It works for cues on carts too, making a MIDI pad controller into a sound board.</li>
+        </ol>
+
+        <h2>MIDI cues</h2>
+        <p>Send one message per cue. Choose the output and the message type:</p>
+        <div class="table-wrap"><table>
+          <tr><th>Message</th><th>Fields</th></tr>
+          <tr><td>Note On / Note Off</td><td>Channel (1–16), note, velocity.</td></tr>
+          <tr><td>Control Change</td><td>Channel, controller, value.</td></tr>
+          <tr><td>Program Change</td><td>Channel, program. Recalls a scene or preset on a mixer.</td></tr>
+          <tr><td>Pitch Bend</td><td>Channel, value (0–16383).</td></tr>
+          <tr><td>MIDI Show Control</td><td>Device ID (127 = all), command format (Lighting, Sound, Machinery, Video, All types), command (go, stop, resume, timed_go, load, set, fire, all_off, restore, reset, go_off), cue number and list.</td></tr>
+          <tr><td>SysEx (hex)</td><td>Raw bytes, such as <code>F0 7E 7F 06 01 F7</code>.</td></tr>
+        </table></div>
+
+        <h2>MIDI File cues</h2>
+        <p>Play a standard MIDI file (<code>.mid</code>) to an output, at an adjustable <b>Rate</b>. Drop the file onto the window to create one.</p>
+
+        <h2>Timecode cues</h2>
+        <p>Send MIDI timecode (MTC) so other equipment (a lighting console, video server or DAW) follows along. Set the output, <b>Frame rate</b>, <b>Start timecode</b> (<code>HH:MM:SS:FF</code>) and <b>Duration</b>. Link it to your audio with <i>Start next with this</i> so both start on the same GO.</p>
+      </section>
+
+      <section class="tab" id="scripts">
+        <div class="crumb">Control and automation</div>
+        <h1>Script cues</h1>
+        <p class="intro">When the built-in cues aren't enough, a Script cue runs JavaScript with a small API for controlling the show.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/script.gif" alt="Typing a script that logs a message, starts cue 2, waits a second and sets the wash light to full, then running it with Space" width="1280" height="757">
+          <figcaption>Write the script in the <b>Script</b> tab, then GO.</figcaption>
+        </figure>
+
+        <h2>Writing a script</h2>
+        <p>Add a Script cue (toolbar → <b>Script</b>), open its <b>Script</b> tab and type your code. You can use <code>await</code> directly. The cue counts as running until the script finishes.</p>
+        <pre><code>nq.log('Starting act 2');
+nq.start('12');                       // fire cue 12
+await nq.wait(2.5);                   // wait 2.5 seconds
+nq.osc('192.168.1.20', 8000, '/eos/cue/1/5/fire');
+nq.light('front = 40', 3);            // 3-second lighting fade
+if (!nq.isRunning('1')) nq.go();</code></pre>
+
+        <h2>The <code>nq</code> API</h2>
+        <div class="table-wrap"><table>
+          <tr><th>Call</th><th>What it does</th></tr>
+          <tr><td>nq.go()</td><td>Presses GO.</td></tr>
+          <tr><td>nq.start(n)</td><td>Starts cue number <code>n</code> (a string, like <code>'4.1'</code>). Returns false if there's no such cue.</td></tr>
+          <tr><td>nq.stop(n, fade)</td><td>Stops cue <code>n</code>, with an optional fade in seconds.</td></tr>
+          <tr><td>nq.pause(n) / nq.resume(n)</td><td>Pauses or resumes cue <code>n</code>.</td></tr>
+          <tr><td>nq.panic()</td><td>Fades everything out over 1 second.</td></tr>
+          <tr><td>nq.stopAll()</td><td>Stops everything instantly.</td></tr>
+          <tr><td>nq.playhead(n)</td><td>Moves the playhead to cue <code>n</code>.</td></tr>
+          <tr><td>nq.cue(n)</td><td>Returns cue <code>n</code>'s data (name, file, levels…).</td></tr>
+          <tr><td>nq.set(n, prop, value)</td><td>Changes a property of cue <code>n</code>, for example <code>nq.set('3', 'level', -10)</code>.</td></tr>
+          <tr><td>nq.isRunning(n)</td><td>True if cue <code>n</code> is running.</td></tr>
+          <tr><td>nq.wait(seconds)</td><td>Use with <code>await</code> to pause the script.</td></tr>
+          <tr><td>nq.light(commands, seconds)</td><td>Fades lights using the <a href="#lighting">command language</a>.</td></tr>
+          <tr><td>nq.osc(host, port, message)</td><td>Sends an OSC message, in the same format as a Network cue.</td></tr>
+          <tr><td>nq.udp(host, port, text)</td><td>Sends plain UDP text.</td></tr>
+          <tr><td>nq.midi(bytes, outputId)</td><td>Sends raw MIDI bytes, such as <code>[0x90, 60, 100]</code>.</td></tr>
+          <tr><td>nq.log(...)</td><td>Writes to the log (≡ in the top bar).</td></tr>
+          <tr><td>nq.workspace()</td><td>Returns the whole workspace.</td></tr>
+        </table></div>
+        <p>The cue itself is available as <code>cue</code>. Errors are written to the log with the cue number, and the show carries on.</p>
+        <div class="warn"><b>Only run scripts you trust.</b> Script cues can read files and send network messages. Before running a workspace someone else sent you, look at its Script cues.</div>
+      </section>
+
+      <!-- ============================================================ SETUP -->
+
+      <section class="tab" id="settings">
+        <div class="crumb">Setup and files</div>
+        <h1>Workspace settings</h1>
+        <p class="intro">Open settings with ⚙ in the top bar or <kbd>⌘,</kbd>. Settings are saved inside the workspace, so they travel with the show.</p>
+
+        <figure class="demo">
+          <img loading="lazy" src="assets/gifs/settings.gif" alt="Going through each tab of Workspace Settings: General, Audio, Video Stages, Lighting, OSC / Network, MIDI and Remote" width="1280" height="757">
+          <figcaption>Each tab of Workspace Settings.</figcaption>
+        </figure>
+
+        <div class="table-wrap"><table>
+          <tr><th>Tab</th><th>What's there</th></tr>
+          <tr><td>General</td><td>Panic fade time (1 s), autosave backup interval (2 min, 0 = off), keep timestamped backups on every save, double-GO protection (0.2 s), Show Mode.</td></tr>
+          <tr><td>Audio</td><td>Output device, number of output channels, and a name, level and mute for each output.</td></tr>
+          <tr><td>Video Stages</td><td>Your output windows: display, size, fullscreen, background, edge blending and corner-pin warp. See <a href="#stages">Stages</a>.</td></tr>
+          <tr><td>Lighting</td><td>Art-Net or sACN, destination IP, universe offset, refresh rate, Output DMX, the patch and groups. See <a href="#lighting">Lighting</a>.</td></tr>
+          <tr><td>OSC / Network</td><td>Accept OSC &amp; UDP, OSC port, reply port, plain-text UDP port, passcode, and the list of supported commands. See <a href="#osc">OSC</a>.</td></tr>
+          <tr><td>MIDI</td><td>Input, default output, GO and Panic notes, MSC device ID and MSC receive. See <a href="#midi">MIDI</a>.</td></tr>
+          <tr><td>Remote</td><td>Enable the web remote, port, passcode, and the addresses to open. See <a href="#remote">Phone remote</a>.</td></tr>
+        </table></div>
+      </section>
+
+      <section class="tab" id="files">
+        <div class="crumb">Setup and files</div>
+        <h1>Saving, backups and moving shows</h1>
+        <p class="intro">A workspace is one <code>.nomadcue</code> file holding your cue lists, carts and settings. Media files stay where they are and are referenced by path.</p>
+
+        <h2>The File menu</h2>
+        <div class="table-wrap"><table>
+          <tr><th>Command</th><th>Shortcut</th><th>What it does</th></tr>
+          <tr><td>New Workspace</td><td><kbd>⌘N</kbd></td><td>Starts an empty workspace.</td></tr>
+          <tr><td>Open…</td><td><kbd>⌘O</kbd></td><td>Opens a <code>.nomadcue</code> file. You can also double-click one, or drop it onto the window.</td></tr>
+          <tr><td>Save / Save As…</td><td><kbd>⌘S</kbd> / <kbd>⌘⇧S</kbd></td><td>Saves the workspace.</td></tr>
+          <tr><td>Bundle Workspace (copy media)…</td><td></td><td>Copies every media file into a <code>media</code> folder next to the workspace. See below.</td></tr>
+          <tr><td>Workspace Settings…</td><td><kbd>⌘,</kbd></td><td>Opens <a href="#settings">settings</a>.</td></tr>
+        </table></div>
+
+        <h2>Backups</h2>
+        <ul>
+          <li>Each save also writes a copy named <code>Show 2026-10-25T19-30-00.nomadcue</code> into a <b>NomadCue Backups</b> folder beside the workspace. The newest 20 are kept.</li>
+          <li>Once the workspace has been saved, unsaved changes are also backed up every few minutes (2 by default).</li>
+          <li>To go back to an earlier version, open a backup with <b>File → Open</b>, then <b>Save As</b> to give it a new name.</li>
+        </ul>
+
+        <h2>Moving a show to another computer</h2>
+        <ol>
+          <li>Choose <b>File → Bundle Workspace (copy media)…</b> and pick a folder.</li>
+          <li>NomadCue copies every file the show uses into <code>media/</code> inside that folder. Files with the same name are numbered so nothing gets overwritten.</li>
+          <li>Save the workspace into the same folder.</li>
+          <li>Copy the whole folder to the other computer (USB stick, cloud drive…). Paths are saved relative to the workspace, so everything is found.</li>
+        </ol>
+        <div class="tip"><b>Check before the show:</b> any cue whose file can't be found turns red with ⚠. Fix those before the audience arrives.</div>
+      </section>
+
+      <!-- ============================================================ REFERENCE -->
+
+      <section class="tab" id="shortcuts">
+        <div class="crumb">Reference</div>
+        <h1>Keyboard shortcuts</h1>
+        <p class="intro">On Windows and Linux, use <kbd>Ctrl</kbd> for <kbd>⌘</kbd> and <kbd>Alt</kbd> for <kbd>⌥</kbd>.</p>
+
+        <h2>Running the show</h2>
+        <div class="table-wrap"><table>
+          <tr><th>Key</th><th>Action</th></tr>
+          <tr><td><kbd>Space</kbd></td><td>GO</td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>Panic (fade out everything). Press twice for hard stop. In a text field, leaves the field.</td></tr>
+          <tr><td><kbd>↑</kbd> / <kbd>↓</kbd></td><td>Move the selection (and playhead). In Show Mode, move the playhead.</td></tr>
+          <tr><td><kbd>P</kbd></td><td>Pause or resume the selected cue</td></tr>
+          <tr><td><kbd>S</kbd></td><td>Stop the selected cue (not in Show Mode)</td></tr>
+          <tr><td><kbd>V</kbd></td><td>Audition (play) the selected cue (not in Show Mode)</td></tr>
+          <tr><td>Cue hotkeys</td><td>Any single key you assign in a cue's Triggers tab</td></tr>
+          <tr><td><kbd>⌘⇧M</kbd></td><td>Toggle Show Mode</td></tr>
+        </table></div>
+
+        <h2>Editing</h2>
+        <div class="table-wrap"><table>
+          <tr><th>Key</th><th>Action</th></tr>
+          <tr><td><kbd>⌘1</kbd> … <kbd>⌘9</kbd>, <kbd>⌘0</kbd></td><td>New Audio, Mic, Video, Camera, Text, Light, Fade, Network, MIDI cue; <kbd>⌘0</kbd> new Group</td></tr>
+          <tr><td><kbd>Enter</kbd></td><td>Rename the selected cue</td></tr>
+          <tr><td>Right-click</td><td>Cue menu</td></tr>
+          <tr><td><kbd>⌘D</kbd></td><td>Duplicate</td></tr>
+          <tr><td><kbd>⌘G</kbd></td><td>Group the selection</td></tr>
+          <tr><td><kbd>⌘C</kbd> / <kbd>⌘X</kbd> / <kbd>⌘V</kbd></td><td>Copy, cut, paste cues</td></tr>
+          <tr><td><kbd>⌥↑</kbd> / <kbd>⌥↓</kbd></td><td>Move the cue up or down</td></tr>
+          <tr><td><kbd>⌫</kbd></td><td>Delete the selected cues</td></tr>
+          <tr><td><kbd>⌘Z</kbd> / <kbd>⌘⇧Z</kbd></td><td>Undo / redo</td></tr>
+          <tr><td><kbd>⌘</kbd>-click / <kbd>⇧</kbd>-click</td><td>Add to the selection / select a range</td></tr>
+          <tr><td>Double-click</td><td>Edit a cue's number, name, pre-wait or post-wait in place</td></tr>
+        </table></div>
+
+        <h2>Files and windows</h2>
+        <div class="table-wrap"><table>
+          <tr><th>Key</th><th>Action</th></tr>
+          <tr><td><kbd>⌘N</kbd> / <kbd>⌘O</kbd></td><td>New / open workspace</td></tr>
+          <tr><td><kbd>⌘S</kbd> / <kbd>⌘⇧S</kbd></td><td>Save / save as</td></tr>
+          <tr><td><kbd>⌘,</kbd></td><td>Workspace settings</td></tr>
+          <tr><td><kbd>⌘⇧L</kbd></td><td>Light Dashboard</td></tr>
+        </table></div>
+      </section>
+
+      <section class="tab" id="troubleshooting">
+        <div class="crumb">Reference</div>
+        <h1>Troubleshooting</h1>
+        <p class="intro">Common problems and how to fix them. If you're still stuck, <a href="https://github.com/faridmasjedi/NomadCue/issues">open an issue on GitHub</a>.</p>
+
+        <h2>Installing</h2>
+        <h3>macOS says the app "can't be opened" or is from an unidentified developer</h3>
+        <p>NomadCue isn't code-signed yet. Right-click the app in Applications, choose <b>Open</b>, then <b>Open</b> again. You only need to do this once. If there's no Open button, go to <b>System Settings → Privacy &amp; Security</b> and click <b>Open Anyway</b>.</p>
+        <h3>Windows SmartScreen blocks the installer</h3>
+        <p>Click <b>More info</b>, then <b>Run anyway</b>.</p>
+        <h3>The Linux AppImage doesn't start</h3>
+        <p>Make it executable: <code>chmod +x NomadCue-*.AppImage</code>. Some distributions also need <code>libfuse2</code> installed.</p>
+
+        <h2>Running</h2>
+        <h3>Space doesn't GO</h3>
+        <p>You're probably typing in a text field. Press <kbd>Esc</kbd> to leave the field, then <kbd>Space</kbd>. Also check that GO isn't greyed out (end of the list), and that the cue isn't disarmed.</p>
+        <h3>GO skipped a cue</h3>
+        <p>The cue was probably linked to the one before it, so it started automatically. Check the Then column. Disarmed cues are also skipped.</p>
+        <h3>A cue shows ⚠ in the Then column</h3>
+        <p>It's set to <i>Start next when done</i> but never ends on its own. See <a href="#transitions">Transitions</a>.</p>
+
+        <h2>Sound</h2>
+        <h3>No sound</h3>
+        <ul>
+          <li>Check <b>Settings → Audio</b>: the right output device, and outputs not muted.</li>
+          <li>Check the cue's level (<b>Levels</b> tab) and that it's armed.</li>
+          <li>Watch the meters in the status bar. If they move, the problem is after NomadCue (interface, cables, amp).</li>
+        </ul>
+        <h3>A cue is red with ⚠</h3>
+        <p>Its file has moved or been renamed. Choose it again in the Inspector, and use <a href="#files">Bundle Workspace</a> to keep media with the show.</p>
+
+        <h2>Video</h2>
+        <h3>Nothing appears on the projector</h3>
+        <ul>
+          <li><b>Settings → Video Stages</b>: pick the projector as the stage's display, then <b>Open / update</b>.</li>
+          <li>Click <b>Identify</b> to see which screen each stage is on.</li>
+          <li>Check the cue's <b>Stage</b>, <b>Opacity</b> and <b>Layer</b> in its Geometry tab.</li>
+        </ul>
+
+        <h2>Lighting</h2>
+        <h3>Lights don't respond</h3>
+        <ul>
+          <li>Tick <b>Output DMX</b> in Settings → Lighting.</li>
+          <li>The computer and your Art-Net/sACN node must be on the same network and subnet.</li>
+          <li>Check the protocol, destination IP and universe (try a universe offset of 1 or -1 if your node counts differently).</li>
+          <li>Open the Light Dashboard and move a fader. If the patch is wrong, the right fader won't move the right light.</li>
+        </ul>
+
+        <h2>Control</h2>
+        <h3>OSC or UDP messages aren't received</h3>
+        <ul>
+          <li>Tick <b>Accept OSC &amp; UDP control</b>, and check the port.</li>
+          <li>Allow NomadCue through the computer's firewall.</li>
+          <li>If a passcode is set, the sender must send <code>/connect {passcode}</code> first.</li>
+          <li>Open the log (≡) to see what's arriving.</li>
+        </ul>
+        <h3>The phone remote won't load</h3>
+        <p>Use the address shown in <b>Settings → Remote</b> (not <code>localhost</code>), make sure the phone is on the same Wi-Fi, and allow NomadCue through the firewall.</p>
+        <h3>No MIDI devices are listed</h3>
+        <p>Connect the device before opening NomadCue, or reopen the settings. On macOS, enable the IAC Driver in Audio MIDI Setup for virtual ports.</p>
+      </section>
+    </main>
+  </div>
+
+  <script src="assets/guide.js"></script>
+</body>
+</html>
